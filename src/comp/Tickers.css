@@ -1,0 +1,6 @@
+.grid-view-2x5 {
+    width: 100%;
+    display: grid;
+    padding-top: 50px;
+    grid-template-columns: repeat(2, 50%);
+}

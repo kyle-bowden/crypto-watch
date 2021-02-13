@@ -1,0 +1,47 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 99999;
+    background: rgb(160,170,170);
+    background: linear-gradient(0deg, rgb(0 0 0) 0%, rgb(119 109 109) 100%);
+}
+
+.navbar-logo {
+    text-align: center;
+    align-self: center;
+}
+
+.navbar-container {
+    display: grid;
+    grid-auto-columns: 70% 8% 8% 14%;
+    grid-template-areas: "a a a a";
+}
+.navbar-container h1 {
+    color: white;
+}
+
+.navbar-container button {
+    margin: 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: large;
+}
+
+.button-default {
+    background: linear-gradient(0deg, rgb(214 200 200) 0%, rgb(119 109 109) 100%)
+}
+
+.button-reset {
+    background: linear-gradient(0deg, rgb(0 208 255) 0%, rgb(0 103 113) 100%)
+}
+
+button:focus {outline:0;}
+
+button:disabled,
+button[disabled]{
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+}

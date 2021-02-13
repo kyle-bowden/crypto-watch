@@ -1,0 +1,86 @@
+.ticker-detail {
+    margin: 10px;
+    display: grid;
+    color: white;
+    border-radius: 20px;
+    grid-template-columns: 30% 70%;
+}
+
+.crypto {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: 20% 80%;
+}
+
+.rank {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    border-radius: 0 20px 0 0;
+}
+
+.title {
+    text-align: center;
+    border-radius: 20px 0 0 0;
+}
+
+.low-high {
+    display: grid;
+    grid-template-columns: 20% 40% 40%;
+    grid-template-rows: 50% 50%;
+    border-width: 2px;
+    border-radius: 20px;
+    text-align: center;
+    align-self: center;
+}
+
+.chart-7d {
+    padding: 10px;
+    position: relative;
+}
+
+.image {
+    display: grid;
+    grid-template-rows: 20% 80%;
+    text-align: center;
+}
+
+.image img {
+    width: 60%;
+    border-radius: 50px;
+}
+
+.current-price {
+    font-size: 40px;
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: center;
+}
+
+.loading {
+    left: 45%;
+    top: 40%;
+}
+
+.space-right {
+    padding-right: 10px;
+}
+
+.space-top {
+    margin-top: 12px;
+}
+
+.orange {
+    color: orange;
+}
+
+.black {
+    color: black;
+}
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
+}
