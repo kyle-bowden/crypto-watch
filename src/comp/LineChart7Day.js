@@ -9,7 +9,6 @@ function LineChart7Day(props) {
 
     useEffect(() => {
         setTimeout(() => {
-            console.log(props);
             props.fetchLineData(props.id).then(setLoading(false));
         }, 500);
     }, []);
@@ -25,7 +24,7 @@ function LineChart7Day(props) {
     return (
         <>
             {loading === true ? <div className="lds-facebook loading"><div/><div/><div/></div> :
-                <Line onElementsClick={() => window.open("https://uk.tradingview.com/symbols/" + props.symbol.toUpperCase() + "USD")} data={findChartById(props.id)}
+                <Line onElementsClick={() => window.open(props.tradingURL)} data={findChartById(props.id)}
                       options={{
                           responsive: true,
                           maintainAspectRatio: false,

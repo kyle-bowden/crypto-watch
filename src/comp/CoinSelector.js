@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './CoinSelector.css';
 import { connect } from "react-redux";
 import { useSelector } from "react-redux";
-import {fetchPost, preparePost} from "../redux/actions";
+import { preparePost } from "../redux/actions";
 import { DropdownList } from 'react-widgets';
 import 'react-widgets/dist/css/react-widgets.css';
 
@@ -18,7 +18,6 @@ function CoinSelector(props) {
             setSearch("");
             setSearchData([]);
             props.preparePost(c.id);
-            props.fetchPost(c.id);
         }
     };
 
@@ -51,7 +50,6 @@ function CoinSelector(props) {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchPost: (id) => dispatch(fetchPost(id)),
         preparePost: (id) => dispatch(preparePost(id))
     }
 };

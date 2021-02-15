@@ -14,7 +14,7 @@
 
 .rank {
     display: grid;
-    grid-template-columns: 60% 40%;
+    grid-template-columns: 45% 20% 35%;
     border-radius: 0 20px 0 0;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .image img {
-    width: 60%;
+    width: 40%;
     border-radius: 50px;
 }
 
@@ -54,6 +54,32 @@
     margin-top: 0;
     margin-bottom: 0;
     align-self: center;
+}
+
+.menu {
+    position: relative;
+}
+
+.menu-offset-top {
+    top: 3em;
+}
+
+.menu-offset-bottom {
+    bottom: 3em;
+}
+
+.menu img {
+    width: 20%;
+    transition: .5s ease;
+    background-color: white;
+}
+
+.menu-item:hover {
+    width: 22%;
+}
+
+.menu-item-gap {
+    margin-right: 10%;
 }
 
 .loading {

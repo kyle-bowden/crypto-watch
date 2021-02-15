@@ -2,35 +2,52 @@ import axios from 'axios'
 
 const GET_COIN_LIST = 'https://api.coingecko.com/api/v3/coins/list';
 const GET_GRAPH_URL = 'https://api.coingecko.com/api/v3/coins/[ID]/ohlc?vs_currency=usd&days=1';
-const GET_POST_URL = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=[POST_IDS]&category=coin%2Cdecentralized_finance_defi&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h';
+const GET_POST_URL = 'https://api.coingecko.com/api/v3/coins/[ID]?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false';
 
-const refreshAllPostsSuccess = posts => ({
+const refreshAllPostsSuccess = post => ({
     type: 'REFRESH_ALL_POSTS_SUCCESS',
-    payload: { posts }
+    payload: { post }
 });
 
 export const refreshAllPosts = (posts) => {
 
     return async dispatch => {
         try {
-            const postIds = posts.map(post => post.id).join("%2C");
-            let updatedPosts = await axios.get(GET_POST_URL.replace("[POST_IDS]", postIds));
-            dispatch(refreshAllPostsSuccess(updatedPosts.data));
+            posts.map(async post => {
+                let updatedPost = await axios.get(GET_POST_URL.replace("[ID]", post.id));
+                dispatch(refreshAllPostsSuccess(updatedPost.data));
+            });
         } catch(e){
             console.log(e)
         }
     }
 };
 
+export const deletePost = (post) => ({
+    type: 'DELETE_POST_SUCCESS',
+    payload: { post: post }
+});
+
 export const clearAllPosts = () => ({
     type: 'CLEAR_ALL_POSTS_SUCCESS',
     payload: { posts: [] }
 });
 
-export const preparePost = (id) => ({
+const preparePostSuccess = (id) => ({
    type: 'PREPARE_POST_SUCCESS',
    payload: { post: {id: id, prepare: true} }
 });
+
+export const preparePost = (id) => {
+    return async dispatch => {
+        try {
+            dispatch(preparePostSuccess(id));
+            dispatch(fetchPost(id));
+        } catch(e) {
+            console.log(e);
+        }
+    }
+};
 
 const fetchPostSuccess = post => ({
     type: 'FETCH_POST_SUCCESS',
@@ -41,8 +58,8 @@ export const fetchPost = (id) => {
 
     return async dispatch => {
         try {
-            let post = await axios.get(GET_POST_URL.replace("[POST_IDS]", id));
-            dispatch(fetchPostSuccess(post.data[0]))
+            let post = await axios.get(GET_POST_URL.replace("[ID]", id));
+            dispatch(fetchPostSuccess(post.data))
         } catch(e){
             console.log(e)
         }
