@@ -14,7 +14,7 @@
 
 .rank {
     display: grid;
-    grid-template-columns: 45% 20% 35%;
+    grid-template-columns: 44% 40% 15%;
     border-radius: 0 20px 0 0;
 }
 
@@ -33,9 +33,13 @@
     align-self: center;
 }
 
+.low-high h1, h2, h3, h4, h5, h6 {
+    margin: 5px;
+}
+
 .chart-7d {
+    height: 200px;
     padding: 10px;
-    position: relative;
 }
 
 .image {
@@ -49,11 +53,31 @@
     border-radius: 50px;
 }
 
+.exchange {
+    align-self: center;
+}
+
+.exchange-connected {
+    width: 50%;
+    height: 50%;
+}
+
+.exchange-disconnected {
+    width: 50%;
+    height: 50%;
+}
+
 .current-price {
     font-size: 40px;
+    font-weight: bold;
     margin-top: 0;
     margin-bottom: 0;
     align-self: center;
+    text-align: center;
+}
+
+.tooltip {
+    font-size: 20px !important;
 }
 
 .menu {
@@ -87,6 +111,15 @@
     top: 40%;
 }
 
+.data {
+    display: grid;
+    grid-template-rows: 71% 29%;
+}
+
+.spacer {
+    height: 20px;
+}
+
 .space-right {
     padding-right: 10px;
 }
@@ -109,4 +142,71 @@
 
 .red {
     color: red;
+}
+
+
+.fade-in {
+     animation: fadeIn ease .5s;
+     -webkit-animation: fadeIn ease .5s;
+     -moz-animation: fadeIn ease .5s;
+     -o-animation: fadeIn ease .5s;
+     -ms-animation: fadeIn ease .5s;
+ }
+
+@keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-moz-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-webkit-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-o-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-ms-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+.fade-out-slight {
+    animation: fadeOutSlight ease .5s;
+    -webkit-animation: fadeOutSlight ease .5s;
+    -moz-animation: fadeOutSlight ease .5s;
+    -o-animation: fadeOutSlight ease .5s;
+    -ms-animation: fadeOutSlight ease .5s;
+}
+
+@keyframes fadeOutSlight {
+    0% {opacity:1;}
+    100% {opacity:0.2;}
+}
+
+@-moz-keyframes fadeOutSlight {
+    0% {opacity:1;}
+    100% {opacity:0.2;}
+}
+
+@-webkit-keyframes fadeOutSlight {
+    0% {opacity:1;}
+    100% {opacity:0.2;}
+}
+
+@-o-keyframes fadeOutSlight {
+    0% {opacity:1;}
+    100% {opacity:0.2;}
+}
+
+@-ms-keyframes fadeOutSlight {
+    0% {opacity:1;}
+    100% {opacity:0.2;}
 }

@@ -1,8 +1,18 @@
 import axios from 'axios'
 
+const FINNHUB_TOKEN = "c0l62g748v6orbr0r0d0";
+
+const GET_FINNHUB_EXCHANGE_URL = 'https://finnhub.io/api/v1/crypto/symbol?exchange=[EXCHANGE]&token=' + FINNHUB_TOKEN;
+const GET_FINNHUB_GRAPH_URL = 'https://finnhub.io/api/v1/crypto/candle?symbol=[SYMBOL]&resolution=5&from=[TIME_START]&to=[TIME_END]&token=' + FINNHUB_TOKEN;
+
 const GET_COIN_LIST = 'https://api.coingecko.com/api/v3/coins/list';
 const GET_GRAPH_URL = 'https://api.coingecko.com/api/v3/coins/[ID]/ohlc?vs_currency=usd&days=1';
 const GET_POST_URL = 'https://api.coingecko.com/api/v3/coins/[ID]?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false';
+
+export const updatePriceData = (data) => ({
+    type: 'UPDATE_PRICE_DATA_SUCCESS',
+    payload: { data }
+});
 
 const refreshAllPostsSuccess = post => ({
     type: 'REFRESH_ALL_POSTS_SUCCESS',
@@ -38,28 +48,63 @@ const preparePostSuccess = (id) => ({
    payload: { post: {id: id, prepare: true} }
 });
 
-export const preparePost = (id) => {
+export const preparePost = (id, currency) => {
     return async dispatch => {
         try {
             dispatch(preparePostSuccess(id));
-            dispatch(fetchPost(id));
+            dispatch(fetchPost(id, currency))
         } catch(e) {
             console.log(e);
         }
     }
 };
 
-const fetchPostSuccess = post => ({
+const fetchPostSuccess = (post, exchange) => ({
     type: 'FETCH_POST_SUCCESS',
-    payload: { post }
+    payload: { post, exchange }
 });
 
-export const fetchPost = (id) => {
+export const fetchPost = (id, currency) => {
+
+    const findTradeExchange = (post) => {
+        // TODO: finnhub supported exchanges this can be fetched from https://finnhub.io/api/v1/crypto/exchange?token=c0l62g748v6orbr0r0d0
+        const supportedExchanges = [
+            "KRAKEN",
+            "HITBTC",
+            "COINBASE",
+            "GEMINI",
+            "POLONIEX",
+            "Binance",
+            "ZB",
+            "BITTREX",
+            "KUCOIN",
+            "OKEX",
+            "BITFINEX",
+            "HUOBI"
+        ];
+
+        const ticker = post.tickers.find(ticker => supportedExchanges.includes(ticker.market.identifier.toUpperCase()));
+        return ticker !== undefined ? ticker.market.identifier : null;
+    };
 
     return async dispatch => {
         try {
+            // FETCH CRYPTO INFO FROM COIN GECKO
             let post = await axios.get(GET_POST_URL.replace("[ID]", id));
-            dispatch(fetchPostSuccess(post.data))
+
+            // FETCH EXCHANGE/TRADE DATA FROM FINNHUB
+            const exchangeGecko = findTradeExchange(post.data);
+            if(exchangeGecko) {
+                let exchanges = await axios.get(GET_FINNHUB_EXCHANGE_URL.replace("[EXCHANGE]", exchangeGecko));
+                const exchangeFinnhub = exchanges.data.find(exchange => {
+                    const s = (post.data.symbol.toUpperCase() + "/" + currency.toUpperCase());
+                    return exchange.displaySymbol.includes(s);
+                });
+
+                dispatch(fetchPostSuccess(post.data, exchangeFinnhub));
+            } else {
+                dispatch(fetchPostSuccess(post.data));
+            }
         } catch(e){
             console.log(e)
         }
@@ -71,13 +116,43 @@ const fetchLineDataSuccess = (chart, id) => ({
     payload: { chart, id }
 });
 
-export const fetchLineData = (id) => {
+export const fetchLineData = (id, finnhubSymbol) => {
 
     return async dispatch => {
         try {
-            let lineData = await axios.get(GET_GRAPH_URL.replace("[ID]", id));
-            dispatch(fetchLineDataSuccess(lineData.data, id))
-        } catch(e){
+            let lineData = [];
+            if(finnhubSymbol) {
+                const timeSliceEnd = new Date();
+                const timeSliceStart = new Date(timeSliceEnd.getTime());
+                timeSliceStart.setHours(timeSliceEnd.getHours() - 6);
+
+                lineData = await axios.get(GET_FINNHUB_GRAPH_URL.replace("[SYMBOL]", finnhubSymbol)
+                    .replace("[TIME_START]", Math.round(timeSliceStart.valueOf()/1000))
+                    .replace("[TIME_END]",  Math.round(timeSliceEnd.valueOf()/1000)));
+
+                if(lineData) {
+                    // [Timestamp, O, H, L, C]
+                    const data = [];
+                    for(let i = 0; i < lineData.data.t.length; i++) {
+                        let series = [Math.floor(lineData.data.t[i] * 1000), lineData.data.o[i], lineData.data.h[i], lineData.data.l[i], lineData.data.c[i]];
+                        data.push(series);
+                    }
+
+                    if(data.length > 0)
+                        lineData = [{ data: data }];
+                    else
+                        lineData = [ { data: [] }];
+                }
+            } else {
+                lineData = await axios.get(GET_GRAPH_URL.replace("[ID]", id));
+                if(lineData)
+                    lineData = [{ data: lineData.data }];
+                else
+                    lineData = [ { data: [] }];
+            }
+
+            dispatch(fetchLineDataSuccess(lineData, id))
+        } catch(e) {
             console.log(e)
         }
     }

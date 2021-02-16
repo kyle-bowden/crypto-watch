@@ -1,3 +1,7 @@
 .loading {
     left: 45%;
 }
+
+.apexcharts-label {
+    font-size: 15px;
+}

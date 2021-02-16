@@ -12,12 +12,13 @@ function CoinSelector(props) {
 
     const coins = useSelector((state) => state.coins);
     const posts = useSelector((state) => state.posts);
+    const currency = useSelector((state) => state.currency);
 
     const addCoin = (c) => {
         if(!posts.find(post => post.id === c.id)) {
             setSearch("");
             setSearchData([]);
-            props.preparePost(c.id);
+            props.preparePost(c.id, currency);
         }
     };
 
@@ -50,7 +51,7 @@ function CoinSelector(props) {
 
 const mapDispatchToProps = dispatch => {
     return {
-        preparePost: (id) => dispatch(preparePost(id))
+        preparePost: (id, currency) => dispatch(preparePost(id, currency))
     }
 };
 
