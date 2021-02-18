@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import './CoinSelector.css';
 import { connect } from "react-redux";
 import { useSelector } from "react-redux";
-import { preparePost } from "../redux/actions";
 import { DropdownList } from 'react-widgets';
-import 'react-widgets/dist/css/react-widgets.css';
+import { preparePost } from "../redux/actions";
 
 function CoinSelector(props) {
     const [search, setSearch] = useState("Search for and add crypto...");

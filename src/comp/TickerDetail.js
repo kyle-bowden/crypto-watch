@@ -97,8 +97,8 @@ function TickerDetail(props) {
                             />
                             <div className='exchange'>
                                 {props.post.finnhub?.name !== undefined ?
-                                    <Connected data-tip={'Connected to [ ' + props.post.finnhub.name + ' ] exchange'} className='exchange-connected' fill={ hexToRgbA(colors.colors[1], 1)}/> :
-                                    <Disconnected data-tip="Exchange could not be found." className='exchange-disconnected' fill={ hexToRgbA(colors.colors[1], 1)}/>}
+                                    <Connected data-tip={'Connected to \n [ ' + props.post.finnhub.name + ' ] \n exchange'} className='exchange-connected' fill={ hexToRgbA(colors.colors[1], 1)}/> :
+                                    <Disconnected data-tip="Exchange could \n not be found." className='exchange-disconnected' fill={ hexToRgbA(colors.colors[1], 1)}/>}
                                 <ReactTooltip className='tooltip' place="bottom" type="light" effect="solid"/>
                             </div>
                         </div>
@@ -114,7 +114,6 @@ function TickerDetail(props) {
                                 <h3 style={handleColor(props.post.market_data.price_change_percentage_24h)}>${props.post.market_data.price_change_24h} </h3>
                                 <h3 style={handleColor(props.post.market_data.price_change_percentage_24h)}>{props.post.market_data.price_change_percentage_24h}%</h3>
                             </div>
-                            <div className='spacer'/>
                         </div>
                     </div>
                 </div>

@@ -16,7 +16,8 @@ function LineChart7Day(props) {
             },
             zoom: {
                 enabled: false
-            }
+            },
+            redrawOnParentResize: true
         },
         grid: {
             show: true,
@@ -25,6 +26,10 @@ function LineChart7Day(props) {
                 colors: '#555434',
                 opacity: 0.5
             }
+        },
+        annotations: {
+            position: 'front',
+            xaxis: []
         },
         xaxis: {
             type: 'datetime',
@@ -73,19 +78,58 @@ function LineChart7Day(props) {
     useEffect(() => {
         if(props.prepare) {
             // LOAD ONCE
-            props.fetchLineData(props.id, props.finnhub?.symbol);
+            fetchLineData(false)
         }
     }, [props]);
 
     useInterval(() => {
         const time = timer - 1;
         if(time === 0) {
-            props.fetchLineData(props.id, props.finnhub?.symbol)
-                .then(() => setTimer(60 * REFRESH_GRAPH_MINUTES));
+            fetchLineData(true);
         } else {
             setTimer(timer - 1);
         }
     }, 1000);
+
+    const fetchLineData = (resetTimer) => {
+        props.fetchLineData(props.id, props.finnhub?.symbol).then(() => {
+            console.log("ANNOTATIONS UPDATE FOR : " + props.id);
+            const patterns = findPatternsById(props.id);
+
+            if(patterns) {
+                const completeColor = '#00E396';
+                const incompleteColor = '#E34342';
+                const annotations = patterns.map(a => {
+                    return {
+                        x: Math.floor(a.atime*1000),
+                            borderColor: (a.status === 'complete') ? completeColor : incompleteColor,
+                        label: {
+                        borderColor: (a.status === 'complete') ? completeColor : incompleteColor,
+                            style: {
+                            fontSize: '12px',
+                                color: '#000000',
+                                background: (a.status === 'complete') ? completeColor : incompleteColor
+                        },
+                        orientation: 'horizontal',
+                            offsetY: 7,
+                            text: a.patternname + (a.patterntype === "bullish" ? " ↑" : " ↓")
+                        }
+                    }
+                });
+
+                const newAnnotations = {...candlestick};
+                newAnnotations.annotations = { ...newAnnotations.annotations, xaxis: annotations };
+
+                setTimeout(() => {
+                    setCandleStick(newAnnotations);
+                },5000);
+            }
+
+            if(resetTimer) {
+                setTimer(60 * REFRESH_GRAPH_MINUTES);
+            }
+        });
+    };
 
     // const timeString = () => {
     //     const minutes = Math.floor(timer / 60);
@@ -98,20 +142,30 @@ function LineChart7Day(props) {
             const chartById = props.charts.find(chart => chart.id === id);
             return chartById === undefined ? [{data: []}] : chartById.series;
         }
-        console.log("NOPE: ");
         return [{data: []}];
+    };
+
+    const findPatternsById = (id) => {
+        if(props.charts.length > 0) {
+            const chartById = props.charts.find(chart => chart.id === id);
+            return chartById === undefined ? [] : chartById.patterns;
+        }
+        return [];
     };
 
     return (
         <>
             {props.prepare === true ? <div className="lds-facebook loading"><div/><div/><div/></div> :
-                <ReactApexChart
-                    options={candlestick}
-                    series={findChartById(props.id)}
-                    type="candlestick"
-                    width="100%"
-                    height="100%"
-                />
+                <div className='chart-wrapper'>
+                    <ReactApexChart
+                        options={candlestick}
+                        series={findChartById(props.id)}
+                        type="candlestick"
+                        width="100%"
+                        height="100%"
+                    />
+                </div>
+
             }
         </>
     );

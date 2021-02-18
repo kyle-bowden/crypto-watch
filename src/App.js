@@ -10,7 +10,8 @@ function App() {
         <Router>
             <div style={{display: 'grid', gridTemplateColumns: '100%'}}>
                 <Navbar/>
-                <Tickers />
+                <div style={{height: '60px'}}/>
+                <Tickers/>
             </div>
             <Switch>
                 <Route path="/" exact/>

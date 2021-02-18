@@ -1,8 +1,13 @@
 import { subscribe, unsubscribePost, unsubscribeAll } from '../webSocket';
 
-const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd'} , action) => {
+const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layout: {display: '2 X 3', value: 'grid-view-2x3'}} , action) => {
 
     switch(action.type) {
+        case 'CHANGE_GRID_LAYOUT_SUCCESS': {
+            return {
+                ...state, layout: action.payload.layout
+            }
+        }
         case 'UPDATE_PRICE_DATA_SUCCESS': {
             const posts = state.posts.map(post => {
                 const specimen = action.payload.data[0];
@@ -10,16 +15,6 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd'} , act
                     // console.log("UPDATED PRICE FOR " + post.name + " - " + specimen.p.toFixed(2));
                     return {...post, finnhub: {...post.finnhub, price: specimen.p.toFixed(2)}};
                 } else return post;
-            });
-
-            return {
-                ...state, posts: posts
-            };
-        }
-        case 'REFRESH_ALL_POSTS_SUCCESS': {
-            const posts = state.posts.map(obj => {
-                if (obj.id === action.payload.post.id) return action.payload.post;
-                else return obj;
             });
 
             return {
@@ -83,10 +78,10 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd'} , act
 
             let charts = state.charts;
             if (!charts.find(chart => chart.id === action.payload.id)) {
-                charts.push({id: action.payload.id, series: action.payload.chart});
+                charts.push({id: action.payload.id, series: action.payload.chart, patterns: action.payload.patterns});
             } else {
                 charts = charts.map(obj => {
-                    if (obj.id === action.payload.id) return {id: action.payload.id, series: action.payload.chart};
+                    if (obj.id === action.payload.id) return {id: action.payload.id, series: action.payload.chart, patterns: action.payload.patterns};
                     else return obj;
                 });
             }

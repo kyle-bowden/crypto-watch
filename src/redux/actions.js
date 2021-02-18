@@ -3,35 +3,22 @@ import axios from 'axios'
 const FINNHUB_TOKEN = "c0l62g748v6orbr0r0d0";
 
 const GET_FINNHUB_EXCHANGE_URL = 'https://finnhub.io/api/v1/crypto/symbol?exchange=[EXCHANGE]&token=' + FINNHUB_TOKEN;
-const GET_FINNHUB_GRAPH_URL = 'https://finnhub.io/api/v1/crypto/candle?symbol=[SYMBOL]&resolution=5&from=[TIME_START]&to=[TIME_END]&token=' + FINNHUB_TOKEN;
+const GET_FINNHUB_PATTERN_RECOGNITION_URL = 'https://finnhub.io/api/v1/scan/pattern?symbol=[SYMBOL]&resolution=[RESOLUTION]&token=' + FINNHUB_TOKEN;
+const GET_FINNHUB_GRAPH_URL = 'https://finnhub.io/api/v1/crypto/candle?symbol=[SYMBOL]&resolution=[RESOLUTION]&from=[TIME_START]&to=[TIME_END]&token=' + FINNHUB_TOKEN;
 
 const GET_COIN_LIST = 'https://api.coingecko.com/api/v3/coins/list';
 const GET_GRAPH_URL = 'https://api.coingecko.com/api/v3/coins/[ID]/ohlc?vs_currency=usd&days=1';
 const GET_POST_URL = 'https://api.coingecko.com/api/v3/coins/[ID]?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false';
 
+export const changeGridLayout = (layout) => ({
+    type: 'CHANGE_GRID_LAYOUT_SUCCESS',
+    payload: { layout }
+});
+
 export const updatePriceData = (data) => ({
     type: 'UPDATE_PRICE_DATA_SUCCESS',
     payload: { data }
 });
-
-const refreshAllPostsSuccess = post => ({
-    type: 'REFRESH_ALL_POSTS_SUCCESS',
-    payload: { post }
-});
-
-export const refreshAllPosts = (posts) => {
-
-    return async dispatch => {
-        try {
-            posts.map(async post => {
-                let updatedPost = await axios.get(GET_POST_URL.replace("[ID]", post.id));
-                dispatch(refreshAllPostsSuccess(updatedPost.data));
-            });
-        } catch(e){
-            console.log(e)
-        }
-    }
-};
 
 export const deletePost = (post) => ({
     type: 'DELETE_POST_SUCCESS',
@@ -111,9 +98,9 @@ export const fetchPost = (id, currency) => {
     }
 };
 
-const fetchLineDataSuccess = (chart, id) => ({
+const fetchLineDataSuccess = (chart, patterns, id) => ({
     type: 'FETCH_GRAPH_DATA_SUCCESS',
-    payload: { chart, id }
+    payload: { chart, patterns, id }
 });
 
 export const fetchLineData = (id, finnhubSymbol) => {
@@ -121,12 +108,25 @@ export const fetchLineData = (id, finnhubSymbol) => {
     return async dispatch => {
         try {
             let lineData = [];
+            let patterns = [];
             if(finnhubSymbol) {
+                const timeScaleHours = 8;  // TODO: make configurable
+                const resolution = 5; // TODO: make configurable [1, 5, 15, 30, 60, D, W, M]
+
                 const timeSliceEnd = new Date();
                 const timeSliceStart = new Date(timeSliceEnd.getTime());
-                timeSliceStart.setHours(timeSliceEnd.getHours() - 6);
+                timeSliceStart.setHours(timeSliceEnd.getHours() - timeScaleHours);
+
+                const patternData = await axios.get(GET_FINNHUB_PATTERN_RECOGNITION_URL
+                    .replace("[SYMBOL]", finnhubSymbol)
+                    .replace("[RESOLUTION]", resolution));
+
+                if(patternData) {
+                    patterns = patternData.data.points;
+                }
 
                 lineData = await axios.get(GET_FINNHUB_GRAPH_URL.replace("[SYMBOL]", finnhubSymbol)
+                    .replace("[RESOLUTION]", resolution)
                     .replace("[TIME_START]", Math.round(timeSliceStart.valueOf()/1000))
                     .replace("[TIME_END]",  Math.round(timeSliceEnd.valueOf()/1000)));
 
@@ -151,7 +151,7 @@ export const fetchLineData = (id, finnhubSymbol) => {
                     lineData = [ { data: [] }];
             }
 
-            dispatch(fetchLineDataSuccess(lineData, id))
+            dispatch(fetchLineDataSuccess(lineData, patterns, id))
         } catch(e) {
             console.log(e)
         }

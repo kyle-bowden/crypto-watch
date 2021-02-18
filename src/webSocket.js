@@ -25,6 +25,11 @@ export const subscribe = (posts) => {
         });
     });
 
+    socket.addEventListener('close', (event) => {
+        console.log('The connection has been closed.');
+        console.log(event);
+    });
+
     socket.addEventListener('message', function (event) {
         const data = JSON.parse(event.data);
         if(data?.data) store.dispatch(updatePriceData(data.data));

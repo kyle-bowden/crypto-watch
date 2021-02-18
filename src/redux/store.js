@@ -15,6 +15,7 @@ const store = createStore(posts, persistedState, composeEnhancers(
 store.subscribe(() => {
     saveState({
         charts: [],
+        layout: store.getState().layout,
         posts: store.getState().posts.map(post => { return {id: post.id, symbol: post.symbol, tickers: post.tickers, prepare: true, reload: true}}),
         coins: store.getState().coins,
         currency: store.getState().currency
