@@ -1,8 +1,8 @@
 import './App.css';
 import React from "react";
 import Navbar from './comp/Navbar';
-import { BrowserRouter as Router, Switch, Route} from "react-router-dom";
 import Tickers from "./comp/Tickers";
+import { BrowserRouter as Router, Switch, Route} from "react-router-dom";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
         <Router>
             <div style={{display: 'grid', gridTemplateColumns: '100%'}}>
                 <Navbar/>
-                <div style={{height: '60px'}}/>
+                <div style={{height: '50px'}}/>
                 <Tickers/>
             </div>
             <Switch>

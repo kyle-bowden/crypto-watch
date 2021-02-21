@@ -11,7 +11,9 @@ import {ReactComponent as Connected} from '../assets/link_on-24px.svg';
 import {ReactComponent as Disconnected} from '../assets/link_off-24px.svg';
 import ReactTooltip from 'react-tooltip';
 import CountUp from "react-countup";
+import { subscribe, unsubscribe } from '../webSocket';
 import { deletePost, fetchPost } from "../redux/actions";
+import axios from "axios";
 
 function TickerDetail(props) {
     const [lastPrice, setLastPrice] = useState(0);
@@ -47,13 +49,34 @@ function TickerDetail(props) {
     };
 
     useEffect(() => {
+        const CancelToken = axios.CancelToken;
+        const source = CancelToken.source();
+
+        ReactTooltip.rebuild();
+
         if(props.post.reload === true) {
-            props.fetchPost(props.post.id, currency);
+            props.fetchPost(props.post.id, currency, source.token);
         }
 
         if(props.post.market_data)
             setLastPrice(props.post.market_data.current_price[currency]);
-    },  [props, currency]);
+
+        if(props.post?.finnhub && (!props.post?.finnhub?.connected)) {
+            subscribe(props.post, props.post?.finnhub?.connected);
+        }
+
+        if(props.post?.finnhub && props.post?.finnhub?.resubscribe) {
+            subscribe(props.post, !props.post?.finnhub?.resubscribe);
+        }
+
+        return () => {
+            source.cancel();
+            if(props.post?.finnhub && props.post?.finnhub?.connected) {
+                console.log(`CLEANUP COMPONENT: ${props.post.id}`);
+                unsubscribe(props.post, !props.post?.finnhub?.connected);
+            }
+        };
+    },  [props.post?.reload, props.post?.market_data, props.post?.finnhub?.connected, props.post?.finnhub?.resubscribe]);
 
     return (
         <>
@@ -96,15 +119,15 @@ function TickerDetail(props) {
                                 prefix='$'
                             />
                             <div className='exchange'>
-                                {props.post.finnhub?.name !== undefined ?
-                                    <Connected data-tip={'Connected to \n [ ' + props.post.finnhub.name + ' ] \n exchange'} className='exchange-connected' fill={ hexToRgbA(colors.colors[1], 1)}/> :
-                                    <Disconnected data-tip="Exchange could \n not be found." className='exchange-disconnected' fill={ hexToRgbA(colors.colors[1], 1)}/>}
+                                {props.post.finnhub?.connected ?
+                                    <Connected data-tip={'Connected to [ ' + props.post?.finnhub?.name + ' ] exchange'} className='exchange-connected' fill={hexToRgbA(colors.colors[1], 1)}/> :
+                                    <Disconnected data-tip="Exchange could not be found or connected to." className='exchange-disconnected' fill={hexToRgbA(colors.colors[1], 1)}/>}
                                 <ReactTooltip className='tooltip' place="bottom" type="light" effect="solid"/>
                             </div>
                         </div>
                         <div className='data'>
                             <div className='chart-7d'>
-                                <LineChart7Day id={props.post.id} tradingURL={findFirstTradeURL()} finnhub={props.post.finnhub} prepare={props.post.prepareGraph}/>
+                                <LineChart7Day post={props.post} tradingURL={findFirstTradeURL()} finnhub={props.post.finnhub} prepare={props.post.prepareGraph}/>
                             </div>
                             <div className='low-high'>
                                 <h2>24H </h2>
@@ -124,7 +147,7 @@ function TickerDetail(props) {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchPost: (id, currency) => dispatch(fetchPost(id, currency)),
+        fetchPost: (id, currency, token) => dispatch(fetchPost(id, currency, token)),
         deletePost: (post) => dispatch(deletePost(post))
     }
 };

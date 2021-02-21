@@ -1,18 +1,92 @@
-import { subscribe, unsubscribePost, unsubscribeAll } from '../webSocket';
+const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layout: {display: '2 X 3', value: 'grid-view-2x3', maxPostsPerPage: 6}, page: { currentPageNumber: 1, totalPages: 1 }} , action) => {
 
-const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layout: {display: '2 X 3', value: 'grid-view-2x3'}} , action) => {
+    const adjustPostsAfterPageLayoutUpdates = (nextPageNumber, maxPostsPerPage) => {
+        const endIndex = parseInt(maxPostsPerPage) * parseInt(nextPageNumber);
+        const startIndex = parseInt(endIndex) - parseInt(maxPostsPerPage);
+
+        const tempPosts = Object.assign([], state.posts);
+        const affectedPosts = tempPosts.splice(startIndex, endIndex).map(p => p.id);
+        return state.posts.map(post => {
+            if (affectedPosts.includes(post.id)) return {...post, finnhub: {...post.finnhub, resubscribe: true}};
+            else return post;
+        });
+    };
+
+    const updateNumberOfPages = (posts, maxPostsPerPage) => {
+        const pages = Math.floor((posts.length + maxPostsPerPage - 1) / maxPostsPerPage);
+        return pages === 0 ? 1 : pages;
+    };
 
     switch(action.type) {
-        case 'CHANGE_GRID_LAYOUT_SUCCESS': {
+        case 'SORT_POSTS': {
+            function highestRank( a, b ) {
+                if ( a.market_cap_rank < b.market_cap_rank ){
+                    return -1;
+                }
+                if ( a.market_cap_rank > b.market_cap_rank ){
+                    return 1;
+                }
+                return 0;
+            }
+
+            state.posts = state.posts.sort(highestRank);
+
+            const posts = adjustPostsAfterPageLayoutUpdates(1, state.layout.maxPostsPerPage);
+
             return {
-                ...state, layout: action.payload.layout
+                ...state, posts: posts, page: { ...state.page, currentPageNumber: 1 }
+            }
+        }
+        case 'CHANGE_GRID_LAYOUT_SUCCESS': {
+            const maxPostsPerPage = action.payload.layout.maxPostsPerPage;
+            const posts = adjustPostsAfterPageLayoutUpdates(1, maxPostsPerPage);
+
+            const totalPages = updateNumberOfPages(posts, maxPostsPerPage);
+            console.log("PAGES: " + totalPages);
+
+            return {
+                ...state, posts: posts, layout: action.payload.layout, page: { currentPageNumber: 1, totalPages: totalPages }
+            }
+        }
+        case 'GO_NEXT_PAGE': {
+            let nextPageNumber = state.page.currentPageNumber;
+
+            if(action.payload.isNext) {
+                nextPageNumber += 1;
+            } else {
+                nextPageNumber -= 1;
+            }
+            console.log(`NEXT PAGE ${nextPageNumber}`);
+
+            const posts = adjustPostsAfterPageLayoutUpdates(nextPageNumber, state.layout.maxPostsPerPage);
+
+            return {
+                ...state, posts: posts, page: { ...state.page, currentPageNumber: nextPageNumber }
+            }
+        }
+        case 'WEB_SOCKET_IS_CONNECTED_SUCCESS': {
+            const posts = state.posts.map(post => {
+                return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected, resubscribe: !!action.payload.isConnected}};
+            });
+
+            return {
+                ...state, posts: posts
+            }
+        }
+        case 'POST_CONNECTED_TO_WEB_SOCKET_SUCCESS': {
+            const posts = state.posts.map(post => {
+                if (post.id === action.payload.post.id) return {...post, finnhub: {...post.finnhub, connected: true}};
+                else return post;
+            });
+
+            return {
+                ...state, posts: posts
             }
         }
         case 'UPDATE_PRICE_DATA_SUCCESS': {
             const posts = state.posts.map(post => {
                 const specimen = action.payload.data[0];
                 if (post?.finnhub?.symbol === specimen.s) {
-                    // console.log("UPDATED PRICE FOR " + post.name + " - " + specimen.p.toFixed(2));
                     return {...post, finnhub: {...post.finnhub, price: specimen.p.toFixed(2)}};
                 } else return post;
             });
@@ -22,78 +96,78 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
             };
         }
         case 'DELETE_POST_SUCCESS': {
-            unsubscribePost(action.payload.post);
+            state.posts = state.posts.filter(post => post.id !== action.payload.post.id);
 
-            const posts = state.posts.filter(post => post.id !== action.payload.post.id);
+            let page;
+            const totalPages = updateNumberOfPages(state.posts, state.layout.maxPostsPerPage);
+            if(state.page.currentPageNumber > totalPages) {
+                page = {currentPageNumber: totalPages, totalPages: totalPages};
+                state.posts = adjustPostsAfterPageLayoutUpdates(totalPages, state.layout.maxPostsPerPage);
+            } else {
+                page = {...state.page, totalPages: totalPages};
+                state.posts = adjustPostsAfterPageLayoutUpdates(state.page.currentPageNumber, state.layout.maxPostsPerPage);
+            }
+
+            console.log("PAGES: " + totalPages);
 
             return {
-                ...state, posts: posts
+                ...state, page: page
             };
         }
-        case 'CLEAR_ALL_POSTS_SUCCESS':
-            unsubscribeAll(state.posts);
-
+        case 'CLEAR_ALL_POSTS_SUCCESS': {
             return {
-                ...state, posts: action.payload.posts
+                ...state, posts: [], page: { currentPageNumber: 1, totalPages: 1 }
             };
+        }
         case 'PREPARE_POST_SUCCESS':
             return {
                 ...state, posts: [...state.posts, { ...action.payload.post } ]
             };
         case 'FETCH_POST_SUCCESS':
-            // function highestRank( a, b ) {
-            //     if ( a.market_cap_rank < b.market_cap_rank ){
-            //         return -1;
-            //     }
-            //     if ( a.market_cap_rank > b.market_cap_rank ){
-            //         return 1;
-            //     }
-            //     return 0;
-            // }
-
-            // let rankedPosts = posts.data.sort(highestRank).splice(0, 50);
-
-            const posts = state.posts.map(obj => {
-                if(obj.id === action.payload.post.id) return {...action.payload.post,
-                    finnhub: {
-                        symbol: action.payload?.exchange?.symbol,
-                        name: action.payload?.exchange?.description
-                    },
-                    prepareGraph: true};
-                else return obj;
+            const posts = state.posts.map((obj, indx) => {
+                if(obj.id === action.payload.post.id) {
+                    let post;
+                    if(action.payload.exchange) {
+                        post = {
+                            ...action.payload.post,
+                            finnhub: {
+                                symbol: action.payload?.exchange?.symbol,
+                                name: action.payload?.exchange?.description,
+                                connected: false
+                            },
+                            prepareGraph: true,
+                            scrollToHere: state.layout.scrollEvery === indx
+                        };
+                    } else {
+                        post = {
+                            ...action.payload.post,
+                            prepareGraph: true,
+                            scrollToHere: state.layout.scrollEvery === indx
+                        };
+                    }
+                    return post;
+                } else return obj;
             });
 
-            // resubscribe to websocket for updated price
-            const waitingPageLoad = posts.filter(post => post.prepare === true);
-            console.log("WAIT FOR ALL PAGE POSTS TO LOAD: " + waitingPageLoad.length);
-            if(waitingPageLoad.length === 0) {
-                subscribe(posts);
-            }
+            let page;
+            const totalPages = updateNumberOfPages(posts, state.layout.maxPostsPerPage);
+            if(state.page.currentPageNumber < totalPages)
+                page = {currentPageNumber: totalPages, totalPages: totalPages};
+            else
+                page =  { ...state.page, totalPages: totalPages };
+
+            return {
+                ...state, posts: posts, page: page
+            };
+        case 'FETCH_GRAPH_DATA_SUCCESS': {
+            // make prepare false so graph does show loading again once initialised
+            const posts = state.posts.map(obj => {
+                if (obj.id === action.payload.id) return {...obj, graph: { series: action.payload.chart, patterns: action.payload.patterns }, prepareGraph: false};
+                else return obj;
+            });
 
             return {
                 ...state, posts: posts
-            };
-        case 'FETCH_GRAPH_DATA_SUCCESS': {
-            if (state.posts.length === 0) return {...state};
-
-            let charts = state.charts;
-            if (!charts.find(chart => chart.id === action.payload.id)) {
-                charts.push({id: action.payload.id, series: action.payload.chart, patterns: action.payload.patterns});
-            } else {
-                charts = charts.map(obj => {
-                    if (obj.id === action.payload.id) return {id: action.payload.id, series: action.payload.chart, patterns: action.payload.patterns};
-                    else return obj;
-                });
-            }
-
-            // make prepare false so graph does show loading again once initialised
-            const posts = state.posts.map(obj => {
-                if (obj.id === action.payload.id) return {...obj, prepareGraph: false};
-                else return obj;
-            });
-
-            return {
-                ...state, charts: charts, posts: posts
             };
         }
         case 'FETCH_COIN_LIST_SUCCESS':

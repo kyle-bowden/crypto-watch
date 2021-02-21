@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const FINNHUB_TOKEN = "c0l62g748v6orbr0r0d0";
+const FINNHUB_TOKEN = "c0pbvn748v6rvej4ig50";
 
 const GET_FINNHUB_EXCHANGE_URL = 'https://finnhub.io/api/v1/crypto/symbol?exchange=[EXCHANGE]&token=' + FINNHUB_TOKEN;
 const GET_FINNHUB_PATTERN_RECOGNITION_URL = 'https://finnhub.io/api/v1/scan/pattern?symbol=[SYMBOL]&resolution=[RESOLUTION]&token=' + FINNHUB_TOKEN;
@@ -9,6 +9,25 @@ const GET_FINNHUB_GRAPH_URL = 'https://finnhub.io/api/v1/crypto/candle?symbol=[S
 const GET_COIN_LIST = 'https://api.coingecko.com/api/v3/coins/list';
 const GET_GRAPH_URL = 'https://api.coingecko.com/api/v3/coins/[ID]/ohlc?vs_currency=usd&days=1';
 const GET_POST_URL = 'https://api.coingecko.com/api/v3/coins/[ID]?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false';
+
+export const sort = () => ({
+    type : 'SORT_POSTS'
+});
+
+export const goNext = (isNext) => ({
+    type : 'GO_NEXT_PAGE',
+    payload: { isNext }
+});
+
+export const webSocketConnected = (isConnected) => ({
+    type : 'WEB_SOCKET_IS_CONNECTED_SUCCESS',
+    payload: { isConnected }
+});
+
+export const postConnectedToWebsocket = (post) => ({
+    type : 'POST_CONNECTED_TO_WEB_SOCKET_SUCCESS',
+    payload: { post }
+});
 
 export const changeGridLayout = (layout) => ({
     type: 'CHANGE_GRID_LAYOUT_SUCCESS',
@@ -26,8 +45,7 @@ export const deletePost = (post) => ({
 });
 
 export const clearAllPosts = () => ({
-    type: 'CLEAR_ALL_POSTS_SUCCESS',
-    payload: { posts: [] }
+    type: 'CLEAR_ALL_POSTS_SUCCESS'
 });
 
 const preparePostSuccess = (id) => ({
@@ -51,7 +69,7 @@ const fetchPostSuccess = (post, exchange) => ({
     payload: { post, exchange }
 });
 
-export const fetchPost = (id, currency) => {
+export const fetchPost = (id, currency, token) => {
 
     const findTradeExchange = (post) => {
         // TODO: finnhub supported exchanges this can be fetched from https://finnhub.io/api/v1/crypto/exchange?token=c0l62g748v6orbr0r0d0
@@ -77,12 +95,12 @@ export const fetchPost = (id, currency) => {
     return async dispatch => {
         try {
             // FETCH CRYPTO INFO FROM COIN GECKO
-            let post = await axios.get(GET_POST_URL.replace("[ID]", id));
+            let post = await axios.get(GET_POST_URL.replace("[ID]", id), { cancelToken: token });
 
             // FETCH EXCHANGE/TRADE DATA FROM FINNHUB
             const exchangeGecko = findTradeExchange(post.data);
             if(exchangeGecko) {
-                let exchanges = await axios.get(GET_FINNHUB_EXCHANGE_URL.replace("[EXCHANGE]", exchangeGecko));
+                let exchanges = await axios.get(GET_FINNHUB_EXCHANGE_URL.replace("[EXCHANGE]", exchangeGecko), { cancelToken: token });
                 const exchangeFinnhub = exchanges.data.find(exchange => {
                     const s = (post.data.symbol.toUpperCase() + "/" + currency.toUpperCase());
                     return exchange.displaySymbol.includes(s);
@@ -93,7 +111,11 @@ export const fetchPost = (id, currency) => {
                 dispatch(fetchPostSuccess(post.data));
             }
         } catch(e){
-            console.log(e)
+            if (axios.isCancel(e)) {
+                console.log(`CANCELLED fetchPost: ${id}`);
+            } else {
+                throw e;
+            }
         }
     }
 };
@@ -103,7 +125,7 @@ const fetchLineDataSuccess = (chart, patterns, id) => ({
     payload: { chart, patterns, id }
 });
 
-export const fetchLineData = (id, finnhubSymbol) => {
+export const fetchLineData = (id, finnhubSymbol, token) => {
 
     return async dispatch => {
         try {
@@ -119,7 +141,7 @@ export const fetchLineData = (id, finnhubSymbol) => {
 
                 const patternData = await axios.get(GET_FINNHUB_PATTERN_RECOGNITION_URL
                     .replace("[SYMBOL]", finnhubSymbol)
-                    .replace("[RESOLUTION]", resolution));
+                    .replace("[RESOLUTION]", resolution), { cancelToken: token });
 
                 if(patternData) {
                     patterns = patternData.data.points;
@@ -128,7 +150,7 @@ export const fetchLineData = (id, finnhubSymbol) => {
                 lineData = await axios.get(GET_FINNHUB_GRAPH_URL.replace("[SYMBOL]", finnhubSymbol)
                     .replace("[RESOLUTION]", resolution)
                     .replace("[TIME_START]", Math.round(timeSliceStart.valueOf()/1000))
-                    .replace("[TIME_END]",  Math.round(timeSliceEnd.valueOf()/1000)));
+                    .replace("[TIME_END]",  Math.round(timeSliceEnd.valueOf()/1000)), { cancelToken: token });
 
                 if(lineData) {
                     // [Timestamp, O, H, L, C]
@@ -144,7 +166,7 @@ export const fetchLineData = (id, finnhubSymbol) => {
                         lineData = [ { data: [] }];
                 }
             } else {
-                lineData = await axios.get(GET_GRAPH_URL.replace("[ID]", id));
+                lineData = await axios.get(GET_GRAPH_URL.replace("[ID]", id), { cancelToken: token });
                 if(lineData)
                     lineData = [{ data: lineData.data }];
                 else
@@ -153,7 +175,11 @@ export const fetchLineData = (id, finnhubSymbol) => {
 
             dispatch(fetchLineDataSuccess(lineData, patterns, id))
         } catch(e) {
-            console.log(e)
+            if (axios.isCancel(e)) {
+                console.log(`CANCELLED fetchLineData: ${id}`);
+            } else {
+                throw e;
+            }
         }
     }
 };

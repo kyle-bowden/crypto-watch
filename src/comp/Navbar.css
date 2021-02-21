@@ -15,8 +15,8 @@
 
 .navbar-container {
     display: grid;
-    grid-auto-columns: 70% 5% 10% 15%;
-    grid-template-areas: "a a a a";
+    grid-auto-columns: 58% 5% 5% 5% 5% 7% 15%;
+    grid-template-areas: "a a a a a a a";
 }
 .navbar-container h1 {
     color: white;
