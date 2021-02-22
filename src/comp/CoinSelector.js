@@ -6,7 +6,7 @@ import { DropdownList } from 'react-widgets';
 import { preparePost } from "../redux/actions";
 
 function CoinSelector(props) {
-    const [search, setSearch] = useState("Search for and add crypto...");
+    const [search, setSearch] = useState("Type to search...");
     const [searchData, setSearchData] = useState([]);
 
     const coins = useSelector((state) => state.coins);
@@ -15,7 +15,7 @@ function CoinSelector(props) {
 
     const addCoin = (c) => {
         if(!posts.find(post => post.id === c.id)) {
-            setSearch("");
+            setSearch("Type to search...");
             setSearchData([]);
             props.preparePost(c.id, currency);
         }
@@ -42,6 +42,7 @@ function CoinSelector(props) {
                                   onChange={value => addCoin(value)}
                                   onSearch={value => filterCoins(value)}
                                   textField="name"
+                                  messages={{emptyList: "Press enter to add crypto.", filterPlaceholder: "Type to search..."}}
                     />}
             </div>
         </>

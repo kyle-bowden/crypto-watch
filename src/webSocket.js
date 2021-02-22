@@ -6,8 +6,9 @@ const FINNHUB_WEB_SOCKET_URL = 'wss://ws.finnhub.io?token=c0pbvn748v6rvej4ig50';
 let retryInterval;
 let inRetry = false;
 let retryCount = 0;
-let retrySeconds = 5000;
-let MAX_RETRIES = 3;
+let MAX_RETRIES = 5;
+let START_SECONDS = 5000;
+let retrySeconds = START_SECONDS;
 
 export let socket;
 
@@ -32,13 +33,17 @@ export const connect = () => {
             clearInterval(retryInterval);
         }
         inRetry = false;
+
+        retrySeconds = START_SECONDS;
+        retryCount = 0;
     };
 
     socket.addEventListener('open', function (event) {
         console.log(`CONNECTED TO ${FINNHUB_WEB_SOCKET_URL}`);
 
         if(inRetry) {
-            // store.dispatch(webSocketConnected(true));
+            console.log(`CONNECT ALL POSTS TO ${FINNHUB_WEB_SOCKET_URL}`);
+            store.dispatch(webSocketConnected(true));
 
             cancelRetry();
         }

@@ -2,10 +2,15 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 99%;
     z-index: 99999;
-    background: rgb(160,170,170);
-    background: linear-gradient(0deg, rgb(0 0 0) 0%, rgb(119 109 109) 100%);
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-color: white;
+    border-top-style: none;
+    margin-left: 10px;
+    background: rgb(142 142 142);
+    background: linear-gradient(0deg, rgb(142 142 142) 0%, rgb(255 255 255) 100%);
 }
 
 .navbar-logo {
@@ -15,22 +20,14 @@
 
 .navbar-container {
     display: grid;
-    grid-auto-columns: 58% 5% 5% 5% 5% 7% 15%;
+    grid-auto-columns: 260px 65px 65px 120px 65px 65px 50%;
     grid-template-areas: "a a a a a a a";
 }
 .navbar-container h1 {
     color: white;
 }
 
-.navbar-container button {
-    margin: 10px;
-    border-radius: 10px 10px 0 0;
-    color: white;
-    font-size: large;
-}
-
 .grid-selector {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-right: 10px;
+    padding-top: 0;
+    padding-left: 15px;
 }

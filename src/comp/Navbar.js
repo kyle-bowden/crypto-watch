@@ -35,11 +35,9 @@ function Navbar(props) {
         <>
             <nav className="navbar">
                 <div className="navbar-container">
-                    <Link to="/" className="navbar-logo">
-                        {/*<img src={Icon} alt='CryptoWatch'/>*/}
-                    </Link>
-                    <button disabled={page.currentPageNumber === 1} className='button-default' onClick={() => nextPage(false)}>Prev</button>
-                    <button disabled={page.currentPageNumber === page.totalPages} className='button-default' onClick={() => nextPage(true)}>Next</button>
+                    <CoinSelector/>
+                    <button className='button-default' onClick={() => sortPosts()}>Sort</button>
+                    <button className='button-default' onClick={() => clearPosts()}>Clear</button>
                     <div className='grid-selector'>
                         <DropdownList
                             data={gridLayouts}
@@ -49,9 +47,11 @@ function Navbar(props) {
                             onChange={value => onGridLayoutChange(value)}
                         />
                     </div>
-                    <button className='button-default' onClick={() => sortPosts()}>Sort</button>
-                    <button className='button-default' onClick={() => clearPosts()}>Clear All</button>
-                    <CoinSelector/>
+                    <button disabled={page.currentPageNumber === 1} className='button-default' onClick={() => nextPage(false)}>Prev</button>
+                    <button disabled={page.currentPageNumber === page.totalPages} className='button-default' onClick={() => nextPage(true)}>Next</button>
+                    <Link to="/" className="navbar-logo">
+                        {/*<img src={Icon} alt='CryptoWatch'/>*/}
+                    </Link>
                 </div>
             </nav>
         </>

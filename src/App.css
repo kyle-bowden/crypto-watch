@@ -13,18 +13,44 @@ html {
 }
 
 .button-default {
-  color: red;
-  border-radius: 20px 0 20px 0;
-  background: linear-gradient(0deg, rgb(214 200 200) 0%, rgb(119 109 109) 100%)
+  background: linear-gradient(0deg, rgb(51 49 49) 0%, rgb(214 214 214) 100%);
+  margin: 0 10px 5px;
+  border-radius: 0 0 10px 10px;
+  color: white;
+  font-size: large;
+  border-style: none;
+  min-width: 60px;
 }
 
+button:hover:enabled {
+  background-color: #cccccc;
+  animation: bounce .5s;
+}
 button:focus {outline:0;}
 
 button:disabled,
 button[disabled]{
   border: 1px solid #999999;
   background-color: #cccccc;
+  opacity: 0.5;
   color: #666666;
+}
+
+@keyframes bounce {
+  0%, 20%, 60%, 100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  40% {
+    -webkit-transform: translateY(-10px);
+    transform: translateY(-10px);
+  }
+
+  80% {
+    -webkit-transform: translateY(-5px);
+    transform: translateY(-5px);
+  }
 }
 
 .lds-ring {

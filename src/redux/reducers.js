@@ -47,10 +47,9 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
                 ...state, page: { ...state.page, currentPageNumber: nextPageNumber }
             }
         }
-        // TODO: not good
         case 'WEB_SOCKET_IS_CONNECTED_SUCCESS': {
             const posts = state.posts.map(post => {
-                return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected}};
+                return {...post, finnhub: {...post.finnhub, connected: false, reconnect: action.payload.isConnected }};
             });
 
             return {
@@ -59,7 +58,7 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
         }
         case 'POST_CONNECTED_TO_WEB_SOCKET_SUCCESS': {
             const posts = state.posts.map(post => {
-                if (post.id === action.payload.id) return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected}};
+                if (post.id === action.payload.id) return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected, reconnect: false}};
                 else return post;
             });
 

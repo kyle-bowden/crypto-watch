@@ -65,6 +65,12 @@ function TickerDetail(props) {
     }, [props.post?.finnhub?.symbol]);
 
     useEffect(() => {
+        if(props.post?.finnhub?.symbol !== undefined &&
+            props.post?.finnhub?.reconnect !== undefined && props.post?.finnhub?.reconnect)
+                subscribe(props.post.id, props.post?.finnhub?.symbol);
+    }, [props.post?.finnhub?.reconnect]);
+
+    useEffect(() => {
         const CancelToken = axios.CancelToken;
         const source = CancelToken.source();
 
