@@ -19,6 +19,7 @@ function TickerDetail(props) {
     const [lastPrice, setLastPrice] = useState(0);
     const [colors, setColors] = useState({ colors: ['#000000'] });
     const [menu, setMenu] = useState(false);
+    const [fetching, setFetching] = useState(true);
     const currency = useSelector((state) => state.currency);
 
     const initColors = (colors) =>  setColors({colors: colors});
@@ -49,38 +50,38 @@ function TickerDetail(props) {
     };
 
     useEffect(() => {
+        if(props.post.market_data)
+            setLastPrice(props.post.market_data.current_price[currency]);
+    },  [props.post?.market_data]);
+
+    useEffect(() => {
+        ReactTooltip.rebuild();
+
+        if(props.post?.finnhub?.symbol !== undefined) subscribe(props.post.id, props.post?.finnhub?.symbol);
+
+        return () => {
+            if(props.post?.finnhub?.symbol !== undefined) unsubscribe(props.post.id, props.post?.finnhub?.symbol);
+        }
+    }, [props.post?.finnhub?.symbol]);
+
+    useEffect(() => {
         const CancelToken = axios.CancelToken;
         const source = CancelToken.source();
 
-        ReactTooltip.rebuild();
-
-        if(props.post.reload === true) {
-            props.fetchPost(props.post.id, currency, source.token);
-        }
-
-        if(props.post.market_data)
-            setLastPrice(props.post.market_data.current_price[currency]);
-
-        if(props.post?.finnhub && (!props.post?.finnhub?.connected)) {
-            subscribe(props.post, props.post?.finnhub?.connected);
-        }
-
-        if(props.post?.finnhub && props.post?.finnhub?.resubscribe) {
-            subscribe(props.post, !props.post?.finnhub?.resubscribe);
-        }
+        console.log(`FETCH POST: ${props.post.id}`);
+        props.fetchPost(props.post.id, currency, source.token).then(() => {
+            setFetching(false);
+        });
 
         return () => {
+            console.log(`CLEANUP CANCEL: ${props.post.id}`);
             source.cancel();
-            if(props.post?.finnhub && props.post?.finnhub?.connected) {
-                console.log(`CLEANUP COMPONENT: ${props.post.id}`);
-                unsubscribe(props.post, !props.post?.finnhub?.connected);
-            }
-        };
-    },  [props.post?.reload, props.post?.market_data, props.post?.finnhub?.connected, props.post?.finnhub?.resubscribe]);
+        }
+    }, []);
 
     return (
         <>
-            {props.post.prepare === true ? <div className="lds-ring loading"><div/><div/><div/><div/></div> :
+            {fetching === true ? <div className="lds-ring loading"><div/><div/><div/><div/></div> :
                 <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.2)}} className='ticker-detail fade-in'>
                     <div className='image' onMouseLeave={() => setMenu(false)}>
                         <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='title'>

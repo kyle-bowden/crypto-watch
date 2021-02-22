@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useLayoutEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {connect} from "react-redux";
 import { fetchLineData } from "../redux/actions";
 import './LineChart7Day.css';
@@ -6,10 +6,11 @@ import ReactApexChart from 'react-apexcharts';
 import axios from "axios";
 
 function LineChart7Day(props) {
-    const REFRESH_GRAPH_MINUTES = 10;
+    const REFRESH_GRAPH_MINUTES = 5; //10
     const [timer, setTimer] = useState(60 * REFRESH_GRAPH_MINUTES);
 
     const [fetch, setFetch] = useState(false);
+    const [source, setSource] = useState(null);
 
     const [candlestick, setCandleStick] = useState({
         chart: {
@@ -81,14 +82,16 @@ function LineChart7Day(props) {
     useEffect(() => {
         const CancelToken = axios.CancelToken;
         const source = CancelToken.source();
+        setSource(source);
 
-        if(props.prepare || fetch) {
-            console.log("FETCH LINE DATA: " + props.post.id);
+        if(fetch) {
+            console.log("REFRESH LINE DATA: " + props.post.id);
 
             if(fetch) {
                 setTimer(60 * REFRESH_GRAPH_MINUTES);
                 setFetch(false);
             }
+
             props.fetchLineData(props.post.id, props.finnhub?.symbol, source.token);
         }
 
@@ -120,11 +123,21 @@ function LineChart7Day(props) {
             // TODO: slows down rendering of graph
             setCandleStick(newAnnotations);
         }
+    }, [fetch, props.post?.graph?.patterns]);
+
+    useEffect(() => {
+        const CancelToken = axios.CancelToken;
+        const source = CancelToken.source();
+        setSource(source);
+
+        console.log("FETCH LINE DATA: " + props.post.id);
+        props.fetchLineData(props.post.id, props.finnhub?.symbol, source.token);
 
         return () => {
-            source.cancel();
-        };
-    }, [props.prepare, fetch, props.post?.graph?.patterns]);
+            console.log(`CLEANUP LineChart7Day: ${props.post.id}`);
+            if(source) source.cancel();
+        }
+    }, []);
 
     useInterval(() => {
         const time = timer - 1;

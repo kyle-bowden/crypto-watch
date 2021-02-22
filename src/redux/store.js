@@ -16,7 +16,7 @@ store.subscribe(() => {
     saveState({
         charts: [],
         layout: store.getState().layout,
-        posts: store.getState().posts.map(post => { return {id: post.id, symbol: post.symbol, tickers: post.tickers, prepare: true, reload: true}}),
+        posts: store.getState().posts.map(post => { return { id: post.id, symbol: post.symbol, tickers: post.tickers }}),
         coins: store.getState().coins,
         currency: store.getState().currency,
         page: store.getState().page

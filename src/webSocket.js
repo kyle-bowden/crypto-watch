@@ -38,7 +38,7 @@ export const connect = () => {
         console.log(`CONNECTED TO ${FINNHUB_WEB_SOCKET_URL}`);
 
         if(inRetry) {
-            store.dispatch(webSocketConnected(true));
+            // store.dispatch(webSocketConnected(true));
 
             cancelRetry();
         }
@@ -68,22 +68,24 @@ export const connect = () => {
     });
 };
 
-export const subscribe = (post, _) => {
+export const subscribe = (id, symbol) => {
     if(socket && socket.readyState === WebSocket.OPEN) {
-        if(post.finnhub?.symbol) {
-            console.log(`SUBSCRIBE TO: ${post.id}`);
-            socket.send(JSON.stringify({'type': 'subscribe', 'symbol': post.finnhub.symbol}));
+        if(symbol) {
+            console.log(`SUBSCRIBE TO: ${id}`);
+            socket.send(JSON.stringify({'type': 'subscribe', 'symbol': symbol}));
 
-            store.dispatch(postConnectedToWebsocket(post));
+            store.dispatch(postConnectedToWebsocket(id, true));
         }
     }
 };
 
-export const unsubscribe = (post) => {
+export const unsubscribe = (id, symbol) => {
     if(socket && socket.readyState === WebSocket.OPEN) {
-        if(post?.finnhub?.symbol) {
-            console.log(`UNSUBSCRIBE: ${post.id}`);
-            socket.send(JSON.stringify({'type': 'unsubscribe', 'symbol': post.finnhub.symbol}))
+        if(symbol) {
+            console.log(`UNSUBSCRIBE: ${id}`);
+            socket.send(JSON.stringify({'type': 'unsubscribe', 'symbol': symbol}));
+
+            store.dispatch(postConnectedToWebsocket(id, false));
         }
     }
 };

@@ -1,17 +1,5 @@
 const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layout: {display: '2 X 3', value: 'grid-view-2x3', maxPostsPerPage: 6}, page: { currentPageNumber: 1, totalPages: 1 }} , action) => {
 
-    const adjustPostsAfterPageLayoutUpdates = (nextPageNumber, maxPostsPerPage) => {
-        const endIndex = parseInt(maxPostsPerPage) * parseInt(nextPageNumber);
-        const startIndex = parseInt(endIndex) - parseInt(maxPostsPerPage);
-
-        const tempPosts = Object.assign([], state.posts);
-        const affectedPosts = tempPosts.splice(startIndex, endIndex).map(p => p.id);
-        return state.posts.map(post => {
-            if (affectedPosts.includes(post.id)) return {...post, finnhub: {...post.finnhub, resubscribe: true}};
-            else return post;
-        });
-    };
-
     const updateNumberOfPages = (posts, maxPostsPerPage) => {
         const pages = Math.floor((posts.length + maxPostsPerPage - 1) / maxPostsPerPage);
         return pages === 0 ? 1 : pages;
@@ -31,21 +19,18 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
 
             state.posts = state.posts.sort(highestRank);
 
-            const posts = adjustPostsAfterPageLayoutUpdates(1, state.layout.maxPostsPerPage);
-
             return {
-                ...state, posts: posts, page: { ...state.page, currentPageNumber: 1 }
+                ...state, page: { ...state.page, currentPageNumber: 1 }
             }
         }
         case 'CHANGE_GRID_LAYOUT_SUCCESS': {
             const maxPostsPerPage = action.payload.layout.maxPostsPerPage;
-            const posts = adjustPostsAfterPageLayoutUpdates(1, maxPostsPerPage);
 
-            const totalPages = updateNumberOfPages(posts, maxPostsPerPage);
+            const totalPages = updateNumberOfPages(state.posts, maxPostsPerPage);
             console.log("PAGES: " + totalPages);
 
             return {
-                ...state, posts: posts, layout: action.payload.layout, page: { currentPageNumber: 1, totalPages: totalPages }
+                ...state, layout: action.payload.layout, page: { currentPageNumber: 1, totalPages: totalPages }
             }
         }
         case 'GO_NEXT_PAGE': {
@@ -58,15 +43,14 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
             }
             console.log(`NEXT PAGE ${nextPageNumber}`);
 
-            const posts = adjustPostsAfterPageLayoutUpdates(nextPageNumber, state.layout.maxPostsPerPage);
-
             return {
-                ...state, posts: posts, page: { ...state.page, currentPageNumber: nextPageNumber }
+                ...state, page: { ...state.page, currentPageNumber: nextPageNumber }
             }
         }
+        // TODO: not good
         case 'WEB_SOCKET_IS_CONNECTED_SUCCESS': {
             const posts = state.posts.map(post => {
-                return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected, resubscribe: !!action.payload.isConnected}};
+                return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected}};
             });
 
             return {
@@ -75,7 +59,7 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
         }
         case 'POST_CONNECTED_TO_WEB_SOCKET_SUCCESS': {
             const posts = state.posts.map(post => {
-                if (post.id === action.payload.post.id) return {...post, finnhub: {...post.finnhub, connected: true}};
+                if (post.id === action.payload.id) return {...post, finnhub: {...post.finnhub, connected: action.payload.isConnected}};
                 else return post;
             });
 
@@ -96,22 +80,20 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
             };
         }
         case 'DELETE_POST_SUCCESS': {
-            state.posts = state.posts.filter(post => post.id !== action.payload.post.id);
+            const posts = state.posts.filter(post => post.id !== action.payload.post.id);
 
             let page;
-            const totalPages = updateNumberOfPages(state.posts, state.layout.maxPostsPerPage);
+            const totalPages = updateNumberOfPages(posts, state.layout.maxPostsPerPage);
             if(state.page.currentPageNumber > totalPages) {
                 page = {currentPageNumber: totalPages, totalPages: totalPages};
-                state.posts = adjustPostsAfterPageLayoutUpdates(totalPages, state.layout.maxPostsPerPage);
             } else {
                 page = {...state.page, totalPages: totalPages};
-                state.posts = adjustPostsAfterPageLayoutUpdates(state.page.currentPageNumber, state.layout.maxPostsPerPage);
             }
 
             console.log("PAGES: " + totalPages);
 
             return {
-                ...state, page: page
+                ...state, posts: posts, page: page
             };
         }
         case 'CLEAR_ALL_POSTS_SUCCESS': {
@@ -119,45 +101,49 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
                 ...state, posts: [], page: { currentPageNumber: 1, totalPages: 1 }
             };
         }
-        case 'PREPARE_POST_SUCCESS':
+        case 'PREPARE_POST_SUCCESS': {
+            const posts = [...state.posts, {...action.payload.post},];
+
+            let page;
+            const totalPages = updateNumberOfPages(posts, state.layout.maxPostsPerPage);
+            if(totalPages > state.page.currentPageNumber) {
+                page = { currentPageNumber: totalPages, totalPages: totalPages };
+            } else {
+                page =  { ...state.page, totalPages: totalPages };
+            }
+
             return {
-                ...state, posts: [...state.posts, { ...action.payload.post } ]
+                ...state, posts: posts, page: page, prepareGraph: true
             };
+        }
         case 'FETCH_POST_SUCCESS':
-            const posts = state.posts.map((obj, indx) => {
+            const posts = state.posts.map((obj) => {
                 if(obj.id === action.payload.post.id) {
                     let post;
                     if(action.payload.exchange) {
                         post = {
                             ...action.payload.post,
                             finnhub: {
+                                connected: obj?.finnhub?.connected,
                                 symbol: action.payload?.exchange?.symbol,
-                                name: action.payload?.exchange?.description,
-                                connected: false
+                                name: action.payload?.exchange?.description
                             },
-                            prepareGraph: true,
-                            scrollToHere: state.layout.scrollEvery === indx
+                            prepareGraph: true
                         };
                     } else {
                         post = {
                             ...action.payload.post,
-                            prepareGraph: true,
-                            scrollToHere: state.layout.scrollEvery === indx
+                            prepareGraph: true
                         };
                     }
                     return post;
                 } else return obj;
             });
 
-            let page;
             const totalPages = updateNumberOfPages(posts, state.layout.maxPostsPerPage);
-            if(state.page.currentPageNumber < totalPages)
-                page = {currentPageNumber: totalPages, totalPages: totalPages};
-            else
-                page =  { ...state.page, totalPages: totalPages };
 
             return {
-                ...state, posts: posts, page: page
+                ...state, posts: posts, page: { ...state.page, totalPages: totalPages }
             };
         case 'FETCH_GRAPH_DATA_SUCCESS': {
             // make prepare false so graph does show loading again once initialised

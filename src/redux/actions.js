@@ -24,9 +24,9 @@ export const webSocketConnected = (isConnected) => ({
     payload: { isConnected }
 });
 
-export const postConnectedToWebsocket = (post) => ({
+export const postConnectedToWebsocket = (id, isConnected) => ({
     type : 'POST_CONNECTED_TO_WEB_SOCKET_SUCCESS',
-    payload: { post }
+    payload: { id, isConnected }
 });
 
 export const changeGridLayout = (layout) => ({
@@ -57,7 +57,6 @@ export const preparePost = (id, currency) => {
     return async dispatch => {
         try {
             dispatch(preparePostSuccess(id));
-            dispatch(fetchPost(id, currency))
         } catch(e) {
             console.log(e);
         }

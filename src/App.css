@@ -13,11 +13,9 @@ html {
 }
 
 .button-default {
+  color: red;
+  border-radius: 20px 0 20px 0;
   background: linear-gradient(0deg, rgb(214 200 200) 0%, rgb(119 109 109) 100%)
-}
-
-.button-reset {
-  background: linear-gradient(0deg, rgb(0 208 255) 0%, rgb(0 103 113) 100%)
 }
 
 button:focus {outline:0;}
