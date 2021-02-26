@@ -7,7 +7,7 @@ let retryInterval;
 let inRetry = false;
 let retryCount = 0;
 let MAX_RETRIES = 5;
-let START_SECONDS = 5000;
+let START_SECONDS = 2500;
 let retrySeconds = START_SECONDS;
 
 export let socket;
@@ -16,26 +16,25 @@ export const connect = () => {
     socket = new WebSocket(FINNHUB_WEB_SOCKET_URL);
 
     const retryWebSocketConnection = () => {
-        if(inRetry) {
-            retryCount++;
-            if(retryCount > MAX_RETRIES) {
-                console.log("MAX RETRY ATTEMPTS MADE!");
-                cancelRetry();
-            } else {
-                console.log(`RETRYING WEBSOCKET CONNECTION [${retryCount}/${MAX_RETRIES}]`);
-                connect();
-            }
+        if(retryCount > MAX_RETRIES) {
+            console.log("MAX RETRY ATTEMPTS MADE!");
+            cancelRetry();
+        } else {
+            console.log(`RETRYING WEBSOCKET CONNECTION [${retryCount}/${MAX_RETRIES}]`);
+            connect();
         }
     };
 
     const cancelRetry = () => {
         if(retryInterval) {
-            clearInterval(retryInterval);
+            clearTimeout(retryInterval);
+            retryInterval = null;
         }
-        inRetry = false;
 
-        retrySeconds = START_SECONDS;
-        retryCount = 0;
+        // TODO: need correct mechanism for resetting retry vars
+        // retrySeconds = START_SECONDS;
+        // retryCount = 0;
+        // inRetry = false;
     };
 
     socket.addEventListener('open', function (event) {
@@ -53,13 +52,16 @@ export const connect = () => {
         console.log('CONNECTION CLOSED!');
         console.log(event);
 
-        if(!inRetry) {
+        if(retryCount <= MAX_RETRIES) {
             store.dispatch(webSocketConnected(false));
 
             socket = null;
+            if(!retryInterval) {
+                retryInterval = setTimeout(() => retryWebSocketConnection(), retrySeconds);
+                retrySeconds *= 2;
+                retryCount++;
+            }
             inRetry = true;
-            retryInterval = setInterval(retryWebSocketConnection, retrySeconds);
-            retrySeconds *= 2;
         }
     });
 

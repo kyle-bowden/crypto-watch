@@ -4,6 +4,7 @@
 
 .rw-dropdown-list {
     border: inset !important;
+    border-top-style: none !important;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
 }

@@ -1,4 +1,4 @@
-const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layout: {display: '2 X 3', value: 'grid-view-2x3', maxPostsPerPage: 6}, page: { currentPageNumber: 1, totalPages: 1 }} , action) => {
+const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layout: {display: '2 X 3', value: 'grid-view-2x3', maxPostsPerPage: 6}, page: { currentPageNumber: 1, totalPages: 1, autoPlay: false }} , action) => {
 
     const updateNumberOfPages = (posts, maxPostsPerPage) => {
         const pages = Math.floor((posts.length + maxPostsPerPage - 1) / maxPostsPerPage);
@@ -6,6 +6,11 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
     };
 
     switch(action.type) {
+        case 'SAVE_AUTO_PLAY': {
+            return {
+                ...state, page: { ...state.page, autoPlay: action.payload.isChecked }
+            }
+        }
         case 'SORT_POSTS': {
             function highestRank( a, b ) {
                 if ( a.market_cap_rank < b.market_cap_rank ){
@@ -38,6 +43,9 @@ const posts = (state = {posts: [], charts: [], coins: [], currency: 'usd', layou
 
             if(action.payload.isNext) {
                 nextPageNumber += 1;
+                if(nextPageNumber > state.page.totalPages) {
+                    nextPageNumber = 1;
+                }
             } else {
                 nextPageNumber -= 1;
             }

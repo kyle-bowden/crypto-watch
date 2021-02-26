@@ -1,8 +1,9 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect } from 'react';
 import {connect} from "react-redux";
 import { fetchLineData } from "../redux/actions";
 import './LineChart7Day.css';
 import ReactApexChart from 'react-apexcharts';
+import useInterval from "../useInterval";
 import axios from "axios";
 
 function LineChart7Day(props) {
@@ -11,6 +12,9 @@ function LineChart7Day(props) {
 
     const [fetch, setFetch] = useState(false);
     const [source, setSource] = useState(null);
+
+    const [graphRenderComplete, setGraphRenderComplete] = useState(false);
+    const [renderPatternTimeout, setRenderPatternTimeout] = useState(-1);
 
     const [candlestick, setCandleStick] = useState({
         chart: {
@@ -21,7 +25,14 @@ function LineChart7Day(props) {
             zoom: {
                 enabled: false
             },
-            redrawOnParentResize: true
+            redrawOnParentResize: true,
+            events: {
+                mounted: (chartContext, config) =>  {
+                    setRenderPatternTimeout(setTimeout(() =>  {
+                        setGraphRenderComplete(true);
+                    }, 5000));
+                }
+            }
         },
         grid: {
             show: true,
@@ -95,35 +106,12 @@ function LineChart7Day(props) {
             props.fetchLineData(props.post.id, props.finnhub?.symbol, source.token);
         }
 
-        const patterns = props.post?.graph?.patterns;
-        if(patterns) {
-            const completeColor = '#00E396';
-            const incompleteColor = '#E34342';
-            const annotations = patterns.map(a => {
-                return {
-                    x: Math.floor(a.atime*1000),
-                    borderColor: (a.status === 'complete') ? completeColor : incompleteColor,
-                    label: {
-                        borderColor: (a.status === 'complete') ? completeColor : incompleteColor,
-                        style: {
-                            fontSize: '12px',
-                            color: '#000000',
-                            background: (a.status === 'complete') ? completeColor : incompleteColor
-                        },
-                        orientation: 'horizontal',
-                        offsetY: 7,
-                        text: a.patternname + (a.patterntype === "bullish" ? " ↑" : " ↓")
-                    }
-                }
-            });
+        updatePatternAnnotations(graphRenderComplete, props.post?.graph?.patterns);
 
-            const newAnnotations = {...candlestick};
-            newAnnotations.annotations = { ...newAnnotations.annotations, xaxis: annotations };
-
-            // TODO: slows down rendering of graph
-            setCandleStick(newAnnotations);
+        return () => {
+            if(renderPatternTimeout !== -1) clearTimeout(renderPatternTimeout);
         }
-    }, [fetch, props.post?.graph?.patterns]);
+    }, [fetch, props.post?.graph?.patterns, graphRenderComplete]);
 
     useEffect(() => {
         const CancelToken = axios.CancelToken;
@@ -138,6 +126,43 @@ function LineChart7Day(props) {
             if(source) source.cancel();
         }
     }, []);
+
+    const updatePatternAnnotations = (doRender, patterns) => {
+        if(doRender && patterns) {
+            const completeColor = '#00E396';
+            const incompleteColor = '#E34342';
+            const annotations = patterns.map(a => {
+                const annotation =  {
+                    x: Math.floor(a.atime*1000),
+                    borderColor: (a.status === 'complete') ? completeColor : incompleteColor,
+                    fillColor: 'rgba(255,231,236,0.2)',
+                    label: {
+                        borderColor: (a.status === 'complete') ? completeColor : incompleteColor,
+                        style: {
+                            fontSize: '10px',
+                            color: '#000000',
+                            background: (a.status === 'complete') ? completeColor : incompleteColor
+                        },
+                        orientation: 'vertical',
+                        offsetY: 0,
+                        text: a.patternname + (a.patterntype === "bullish" ? " →" : " ←")
+                    }
+                };
+
+                if(a.btime !== undefined) annotation.x2 = Math.floor(a.btime*1000);
+
+                return annotation;
+            });
+
+            const newAnnotations = {...candlestick};
+            newAnnotations.annotations = { ...newAnnotations.annotations, xaxis: annotations };
+
+            // TODO: slows down rendering of graph
+            setCandleStick(newAnnotations);
+
+            setGraphRenderComplete(false);
+        }
+    };
 
     useInterval(() => {
         const time = timer - 1;
@@ -164,26 +189,6 @@ function LineChart7Day(props) {
             }
         </>
     );
-}
-
-function useInterval(callback, delay) {
-    const savedCallback = useRef();
-
-    // Remember the latest callback.
-    useEffect(() => {
-        savedCallback.current = callback;
-    }, [callback]);
-
-    // Set up the interval.
-    useEffect(() => {
-        function tick() {
-            savedCallback.current();
-        }
-        if (delay !== null) {
-            let id = setInterval(tick, delay);
-            return () => clearInterval(id);
-        }
-    }, [delay]);
 }
 
 const mapDispatchToProps = dispatch => {

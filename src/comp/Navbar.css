@@ -20,8 +20,8 @@
 
 .navbar-container {
     display: grid;
-    grid-auto-columns: 260px 65px 65px 120px 65px 65px 50%;
-    grid-template-areas: "a a a a a a a";
+    grid-auto-columns: 260px 65px 65px 120px 65px 65px 250px 50%;
+    grid-template-areas: "a a a a a a a a";
 }
 .navbar-container h1 {
     color: white;

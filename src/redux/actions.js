@@ -14,6 +14,11 @@ export const sort = () => ({
     type : 'SORT_POSTS'
 });
 
+export const saveAutoPlay = (isChecked) => ({
+    type: 'SAVE_AUTO_PLAY',
+    payload: { isChecked }
+});
+
 export const goNext = (isNext) => ({
     type : 'GO_NEXT_PAGE',
     payload: { isNext }
@@ -154,7 +159,8 @@ export const fetchLineData = (id, finnhubSymbol, token) => {
                 if(lineData) {
                     // [Timestamp, O, H, L, C]
                     const data = [];
-                    for(let i = 0; i < lineData.data.t.length; i++) {
+                    const length = lineData.data?.t === undefined ? 0 : lineData.data?.t?.length;
+                    for(let i = 0; i < length; i++) {
                         let series = [Math.floor(lineData.data.t[i] * 1000), lineData.data.o[i], lineData.data.h[i], lineData.data.l[i], lineData.data.c[i]];
                         data.push(series);
                     }

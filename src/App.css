@@ -22,10 +22,24 @@ html {
   min-width: 60px;
 }
 
-button:hover:enabled {
+.button-default:hover:enabled {
   background-color: #cccccc;
   animation: bounce .5s;
 }
+
+.button-default-mini {
+  background: linear-gradient(0deg, rgb(187 181 181) 0%, rgb(97 92 92) 100%);
+  margin: 0;
+  border-radius: 0 0 10px 10px;
+  color: white;
+  font-size: large;
+  border-style: none;
+}
+
+.button-default-mini:hover:enabled {
+  background: linear-gradient(0deg, rgb(148 148 148) 0%, rgb(214 214 214) 100%);
+}
+
 button:focus {outline:0;}
 
 button:disabled,
@@ -34,6 +48,40 @@ button[disabled]{
   background-color: #cccccc;
   opacity: 0.5;
   color: #666666;
+}
+
+.checkbox-default {
+  font: 400 13.3333px Arial;
+  font-size: large;
+  padding: 10px 10px 0 20px;
+  position: relative;
+  top: -6px;
+}
+
+.checkbox-default input {
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: 3px;
+}
+
+input[type="checkbox"]:checked + label::after {
+  content: '';
+  position: absolute;
+  width: 1.2ex;
+  height: 0.4ex;
+  background: rgba(0, 0, 0, 0);
+  top: 0.9ex;
+  left: 0.4ex;
+  border: 3px solid #ff8734;
+  border-top: none;
+  border-right: none;
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
 }
 
 @keyframes bounce {
@@ -113,7 +161,7 @@ button[disabled]{
 }
 .lds-facebook div:nth-child(3) {
   left: 56px;
-  animation-delay: 0;
+  animation-delay: 0s;
 }
 @keyframes lds-facebook {
   0% {

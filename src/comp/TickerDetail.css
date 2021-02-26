@@ -9,15 +9,18 @@
 .crypto {
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: 20% 80%;
+    grid-template-rows: 12% 88%;
 }
 
 .rank {
     display: grid;
-    max-height: 100px;
+    /*max-height: 100px;*/
     align-content: center;
     grid-template-columns: 44% 40% 15%;
     border-radius: 0 20px 0 0;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    /*border-bottom-color: rgba(153, 153, 153, 0.38);*/
 }
 
 .rank h1 {
@@ -26,20 +29,29 @@
 
 .title {
     display: grid;
-    max-height: 100px;
+    /*max-height: 100px;*/
     text-align: center;
     align-content: center;
     border-radius: 20px 0 0 0;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
 }
 
 .low-high {
     display: grid;
+    height: 80%;
     grid-template-columns: 20% 40% 40%;
-    grid-template-rows: 50% 50%;
+    grid-template-rows: 20% 20% 20% 20% 20%;
     border-width: 2px;
     border-radius: 20px;
     text-align: center;
     align-self: center;
+}
+
+.row {
+    align-self: center;
+    border-radius: 20px;
+    margin: 10px;
 }
 
 .low-high h1, h2, h3, h4, h5, h6 {
@@ -47,13 +59,14 @@
 }
 
 .chart-7d {
+    /*height: 95%;*/
     padding: 10px;
 }
 
 .image {
     display: grid;
-    grid-template-rows: 20% 80%;
     text-align: center;
+    grid-template-rows: 12% 88%;
 }
 
 .image img {
@@ -66,22 +79,28 @@
 }
 
 .exchange-connected {
-    width: 50%;
-    height: 50%;
+    width: 40%;
+    height: 40%;
 }
 
 .exchange-disconnected {
-    width: 50%;
-    height: 50%;
+    width: 40%;
+    height: 40%;
 }
 
 .current-price {
-    font-size: 40px;
+    font-size: 1.5vw;
     font-weight: bold;
     margin-top: 0;
     margin-bottom: 0;
     align-self: center;
     text-align: center;
+}
+
+.header-text {
+    font-size: 1.5vw;
+    font-weight: bold;
+    align-self: center;
 }
 
 .tooltip {
@@ -121,7 +140,8 @@
 
 .data {
     display: grid;
-    grid-template-rows: 71% 29%;
+    grid-template-rows: 8% 88%;
+    border-bottom-right-radius: 20px;
 }
 
 .spacer {
@@ -145,11 +165,11 @@
 }
 
 .green {
-    color: green;
+    color: #00ff00;
 }
 
 .red {
-    color: red;
+    color: #ffdc00;
 }
 
 .fade-in {
