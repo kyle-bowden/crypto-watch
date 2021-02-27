@@ -74,25 +74,25 @@ function TickerDetail(props) {
             );
             case 1: return (
                 <div className='low-high'>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>CAP </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 className='green'>${props.post.market_data.market_cap[currency]} </h2></div>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>CAP </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row green'>${props.post.market_data.market_cap[currency]} </span>
                     <div/>
 
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>ATH </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 className='green'>${props.post.market_data.ath[currency]} </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>{formatDate(props.post.market_data.ath_date[currency])} </h2></div>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>ATH </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row green'>${props.post.market_data.ath[currency]} </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>{formatDate(props.post.market_data.ath_date[currency])} </span>
 
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>ATL </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 className='red'>${props.post.market_data.atl[currency]} </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>{formatDate(props.post.market_data.atl_date[currency])} </h2></div>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>ATL </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row red'>${props.post.market_data.atl[currency]} </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>{formatDate(props.post.market_data.atl_date[currency])} </span>
 
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>24H </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 className='green'>↑ ${props.post.market_data.high_24h[currency]} </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 className='red'>↓ ${props.post.market_data.low_24h[currency]} </h2></div>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>24H </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row green'>↑ ${props.post.market_data.high_24h[currency]} </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row red'>↓ ${props.post.market_data.low_24h[currency]} </span>
 
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2>CHG</h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 style={handleColor(props.post.market_data.price_change_percentage_24h)}>${props.post.market_data.price_change_24h} </h2></div>
-                    <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'><h2 style={handleColor(props.post.market_data.price_change_percentage_24h)}>{props.post.market_data.price_change_percentage_24h}%</h2></div>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>CHG</span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className={'row ' + (isLower(props.post.market_data.price_change_percentage_24h) ? 'red' : 'green')}>${props.post.market_data.price_change_24h} </span>
+                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className={'row ' + (isLower(props.post.market_data.price_change_percentage_24h) ? 'red' : 'green')}>{props.post.market_data.price_change_percentage_24h}%</span>
                 </div>
             );
             default:

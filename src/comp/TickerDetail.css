@@ -9,18 +9,16 @@
 .crypto {
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: 12% 88%;
+    grid-template-rows: 14% 86%;
 }
 
 .rank {
     display: grid;
-    /*max-height: 100px;*/
     align-content: center;
     grid-template-columns: 44% 40% 15%;
     border-radius: 0 20px 0 0;
     border-bottom-style: solid;
     border-bottom-width: 1px;
-    /*border-bottom-color: rgba(153, 153, 153, 0.38);*/
 }
 
 .rank h1 {
@@ -29,7 +27,6 @@
 
 .title {
     display: grid;
-    /*max-height: 100px;*/
     text-align: center;
     align-content: center;
     border-radius: 20px 0 0 0;
@@ -39,7 +36,8 @@
 
 .low-high {
     display: grid;
-    height: 80%;
+    height: 100%;
+    width: 100%;
     grid-template-columns: 20% 40% 40%;
     grid-template-rows: 20% 20% 20% 20% 20%;
     border-width: 2px;
@@ -52,21 +50,19 @@
     align-self: center;
     border-radius: 20px;
     margin: 10px;
-}
-
-.low-high h1, h2, h3, h4, h5, h6 {
-    margin: 5px;
+    font-size: 1vw;
+    font-weight: bold;
 }
 
 .chart-7d {
-    /*height: 95%;*/
+    height: 70%;
     padding: 10px;
 }
 
 .image {
     display: grid;
     text-align: center;
-    grid-template-rows: 12% 88%;
+    grid-template-rows: 14% 86%;
 }
 
 .image img {
@@ -139,8 +135,8 @@
 }
 
 .data {
-    display: grid;
-    grid-template-rows: 8% 88%;
+    display: flex;
+    flex-flow: column;
     border-bottom-right-radius: 20px;
 }
 
