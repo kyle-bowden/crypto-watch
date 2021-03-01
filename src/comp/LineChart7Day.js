@@ -11,7 +11,7 @@ function LineChart7Day(props) {
     const [timer, setTimer] = useState(60 * REFRESH_GRAPH_MINUTES);
 
     const [fetch, setFetch] = useState(false);
-    const [source, setSource] = useState(null);
+    const [mounted, setMounted] = useState(true);
 
     const [graphRenderComplete, setGraphRenderComplete] = useState(false);
     const [renderPatternTimeout, setRenderPatternTimeout] = useState(-1);
@@ -93,7 +93,6 @@ function LineChart7Day(props) {
     useEffect(() => {
         const CancelToken = axios.CancelToken;
         const source = CancelToken.source();
-        setSource(source);
 
         if(fetch) {
             console.log("REFRESH LINE DATA: " + props.post.id);
@@ -109,26 +108,27 @@ function LineChart7Day(props) {
         updatePatternAnnotations(graphRenderComplete, props.post?.graph?.patterns);
 
         return () => {
-            if(renderPatternTimeout !== -1) clearTimeout(renderPatternTimeout);
+            if(source) source.cancel();
         }
     }, [fetch, props.post?.graph?.patterns, graphRenderComplete]);
 
     useEffect(() => {
         const CancelToken = axios.CancelToken;
         const source = CancelToken.source();
-        setSource(source);
 
         console.log("FETCH LINE DATA: " + props.post.id);
         props.fetchLineData(props.post.id, props.finnhub?.symbol, source.token);
 
         return () => {
             console.log(`CLEANUP LineChart7Day: ${props.post.id}`);
+            if(renderPatternTimeout !== -1) clearTimeout(renderPatternTimeout);
             if(source) source.cancel();
+            setMounted(false);
         }
     }, []);
 
     const updatePatternAnnotations = (doRender, patterns) => {
-        if(doRender && patterns) {
+        if(mounted && doRender && patterns) {
             const completeColor = '#00E396';
             const incompleteColor = '#E34342';
             const annotations = patterns.map(a => {

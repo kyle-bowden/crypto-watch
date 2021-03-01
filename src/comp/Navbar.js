@@ -86,7 +86,7 @@ function Navbar(props) {
                     <button disabled={page.currentPageNumber === 1} className='button-default' onClick={() => nextPage(false)}>Prev</button>
                     <button disabled={page.currentPageNumber === page.totalPages} className='button-default' onClick={() => nextPage(true)}>Next</button>
                     <label className='checkbox-default'>
-                        <input onChange={event => onAutoPlayChange(event)} style={{marginRight: '10px', width: '20px', height: '20px'}} type="checkbox" name="name" checked={autoPlay} value={autoPlay}/>
+                        <input onChange={event => onAutoPlayChange(event)} style={{marginRight: '10px', width: '20px', height: '20px'}} type="checkbox" name="name" checked={autoPlay}/>
                         Auto Page ( {timeString()} )
                     </label>
                     <Link to="/" className="navbar-logo">

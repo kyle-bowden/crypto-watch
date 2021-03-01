@@ -31,10 +31,6 @@ function TickerDetail(props) {
         return value < 0;
     };
 
-    const handleColor = (value) => {
-        return isLower(value) ? {color: '#ffdc00'} : {color: '#00ff00'};
-    };
-
     const hexToRgbA = (hex, alpha) => {
         let c;
         if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
@@ -49,7 +45,7 @@ function TickerDetail(props) {
 
     const findFirstTradeURL = () => {
         const ticker = props.post.tickers.find(ticker => ticker.trade_url !== null);
-        return ticker.trade_url;
+        return ticker?.trade_url;
     };
 
     const handleDataViewChange = (indx) => {
@@ -61,7 +57,6 @@ function TickerDetail(props) {
         const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
         const mo = new Intl.DateTimeFormat('en', { month: 'short' }).format(d);
         const da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d);
-        console.log(`${da}-${mo}-${ye}`);
         return `${da}-${mo}-${ye}`;
     };
 
@@ -145,7 +140,7 @@ function TickerDetail(props) {
                             <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>#{props.post.market_data.market_cap_rank} {props.post.name.substr(0, 8).toUpperCase()}</span>
                         </div>
                         <div style={{alignSelf: 'center'}}>
-                            <ColorExtractor src={"https://cors-anywhere.herokuapp.com/" + props.post.image.large} getColors={initColors}/>
+                            <ColorExtractor src={props.post.image.large.replace("https://assets.coingecko.com", "https://localhost:3000")} getColors={initColors}/>
                             {menu ?
                                 <div>
                                     <div className='menu menu-offset-top fade-in'>
