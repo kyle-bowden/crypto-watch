@@ -182,7 +182,7 @@ function TickerDetail(props) {
                             <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>{props.post.name.substr(0, 8).toUpperCase()}</span>
                         </div>
                         <div style={{alignSelf: 'center'}}>
-                            <ColorExtractor src={props.post.image.large.replace("https://assets.coingecko.com", window.location.origin)} getColors={initColors} crossOrigin="anonymous"/>
+                            <ColorExtractor src={props.post.image.large.replace("https://assets.coingecko.com", window.location.origin)} getColors={initColors}/>
                             {menu ?
                                 <div>
                                     <div className='menu menu-offset-top fade-in'>
