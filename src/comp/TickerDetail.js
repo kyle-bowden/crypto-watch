@@ -1,9 +1,9 @@
-import React, {useEffect, useState, useRef} from "react";
+import React, {useEffect, useState } from "react";
 import './TickerDetail.css';
 import { connect } from "react-redux";
 import LineChart7Day from "./LineChart7Day";
 import { ColorExtractor } from 'react-color-extractor'
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import Trade from '../assets/assessment-24px.svg';
 import Web from '../assets/language-24px.svg';
 import Remove from '../assets/delete-24px.svg';
@@ -13,16 +13,15 @@ import ReactTooltip from 'react-tooltip';
 import CountUp from "react-countup";
 import { subscribe, unsubscribe } from '../webSocket';
 import { deletePost, fetchPost } from "../redux/actions";
-import { Slide } from "react-slideshow-image";
 import axios from "axios";
 
 function TickerDetail(props) {
     const dataViews = ["Graph", "Stats"];
+    const [dataViewIndex, setDataViewIndex] = useState(0);
     const [lastPrice, setLastPrice] = useState(0);
     const [colors, setColors] = useState({ colors: ['#000000'] });
     const [menu, setMenu] = useState(false);
     const [fetching, setFetching] = useState(true);
-    const [dataView, setDataView] = useState(0);
     const currency = useSelector((state) => state.currency);
 
     const initColors = (colors) =>  setColors({colors: colors});
@@ -49,7 +48,7 @@ function TickerDetail(props) {
     };
 
     const handleDataViewChange = (indx) => {
-        setDataView(indx);
+        setDataViewIndex(indx);
     };
 
     const formatDate = (date) => {
@@ -60,38 +59,62 @@ function TickerDetail(props) {
         return `${da}-${mo}-${ye}`;
     };
 
-    const renderDataView = (indx) => {
-        switch (indx) {
-            case 0: return (
+    const renderDataView = () => {
+        switch (dataViews[dataViewIndex]) {
+            case 'Graph': return (
                 <div className='chart-7d'>
                     <LineChart7Day post={props.post} tradingURL={findFirstTradeURL()} finnhub={props.post.finnhub} prepare={props.post.prepareGraph}/>
                 </div>
             );
-            case 1: return (
+            case 'Stats': return (
                 <div className='low-high'>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>CAP </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row green'>${props.post.market_data.market_cap[currency]} </span>
+                    <span className='row row-detail'>CAP </span>
+                    <span className='row row-detail green'>${props.post.market_data.market_cap[currency]} </span>
                     <div/>
 
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>ATH </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row green'>${props.post.market_data.ath[currency]} </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>{formatDate(props.post.market_data.ath_date[currency])} </span>
+                    <span className='row row-detail'>ATH </span>
+                    <span className='row row-detail green'>${props.post.market_data.ath[currency]} </span>
+                    <span className='row row-detail'>{formatDate(props.post.market_data.ath_date[currency])} </span>
 
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>ATL </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row red'>${props.post.market_data.atl[currency]} </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>{formatDate(props.post.market_data.atl_date[currency])} </span>
+                    <span className='row row-detail'>ATL </span>
+                    <span className='row row-detail red'>${props.post.market_data.atl[currency]} </span>
+                    <span className='row row-detail'>{formatDate(props.post.market_data.atl_date[currency])} </span>
 
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>24H </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row green'>↑ ${props.post.market_data.high_24h[currency]} </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row red'>↓ ${props.post.market_data.low_24h[currency]} </span>
+                    <span className='row row-detail'>24H </span>
+                    <span className='row row-detail green'>↑ ${props.post.market_data.high_24h[currency]} </span>
+                    <span className='row row-detail red'>↓ ${props.post.market_data.low_24h[currency]} </span>
 
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className='row'>CHG</span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className={'row ' + (isLower(props.post.market_data.price_change_percentage_24h) ? 'red' : 'green')}>${props.post.market_data.price_change_24h} </span>
-                    <span style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5)}} className={'row ' + (isLower(props.post.market_data.price_change_percentage_24h) ? 'red' : 'green')}>{props.post.market_data.price_change_percentage_24h}%</span>
+                    <span className='row row-detail'>CHG</span>
+                    <span className={'row row-detail ' + (isLower(props.post.market_data.price_change_percentage_24h) ? 'red' : 'green')}>${props.post.market_data.price_change_24h} </span>
+                    <span className={'row row-detail ' + (isLower(props.post.market_data.price_change_percentage_24h) ? 'red' : 'green')}>{props.post.market_data.price_change_percentage_24h}%</span>
                 </div>
             );
             default:
                 break;
+        }
+    };
+
+    const renderPriceChange = () => {
+        if(!props.autoViewChange) {
+            return (
+                <CountUp style={{color: 'white', textAlign: 'center'}}
+                         className="row row-right current-price fade-in"
+                         start={lastPrice}
+                         end={props.post?.finnhub?.price === undefined ? parseFloat(lastPrice) : parseFloat(props.post?.finnhub?.price)}
+                         duration={2.75}
+                         useEasing={true}
+                         useGrouping={true}
+                         separator=" "
+                         decimals={2}
+                         decimal=","
+                         prefix='$ '
+                />
+            );
+        } else {
+            const isLow = isLower(props.post.market_data.price_change_percentage_24h);
+            return (
+                <span className={'row row-right header-text fade-in ' + (isLow ? 'red' : 'green')} style={{textAlign: 'center'}}>$ {props.post.market_data.price_change_24h.toFixed(3)}</span>
+            );
         }
     };
 
@@ -137,7 +160,7 @@ function TickerDetail(props) {
                 <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.2)}} className='ticker-detail fade-in'>
                     <div className='image' onMouseLeave={() => setMenu(false)}>
                         <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5), borderBottomColor: hexToRgbA(colors.colors[1], 1)}} className='title'>
-                            <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>#{props.post.market_data.market_cap_rank} {props.post.name.substr(0, 8).toUpperCase()}</span>
+                            <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>{props.post.name.substr(0, 8).toUpperCase()}</span>
                         </div>
                         <div style={{alignSelf: 'center'}}>
                             <ColorExtractor src={props.post.image.large.replace("https://assets.coingecko.com", "https://localhost:3000")} getColors={initColors}/>
@@ -158,23 +181,12 @@ function TickerDetail(props) {
                     </div>
                     <div className='crypto'>
                         <div style={{backgroundColor: hexToRgbA(colors.colors[0], 0.5), borderBottomColor: hexToRgbA(colors.colors[1], 1)}} className='rank'>
-                            <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>({props.post.symbol.toUpperCase()})</span>
-                            <CountUp style={{color: hexToRgbA(colors.colors[1], 1), textAlign: 'center'}}
-                                className="current-price"
-                                start={lastPrice}
-                                end={props.post?.finnhub?.price === undefined ? parseFloat(lastPrice) : parseFloat(props.post?.finnhub?.price)}
-                                duration={2.75}
-                                useEasing={true}
-                                useGrouping={true}
-                                separator=" "
-                                decimals={2}
-                                decimal=","
-                                prefix='$'
-                            />
+                            <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>#{props.post.market_data.market_cap_rank} ({props.post.symbol.toUpperCase()})</span>
+                            {renderPriceChange()}
                             <div className='exchange'>
                                 {props.post.finnhub?.connected ?
-                                    <Connected data-tip={'Connected to [ ' + props.post?.finnhub?.name + ' ] exchange'} className='exchange-connected' fill={hexToRgbA(colors.colors[1], 1)}/> :
-                                    <Disconnected data-tip="Exchange could not be found or connected to." className='exchange-disconnected' fill={hexToRgbA(colors.colors[1], 1)}/>}
+                                    <span className='row row-left'><Connected data-tip={'Connected to [ ' + props.post?.finnhub?.name + ' ] exchange'} className='exchange-connected' fill='white'/></span> :
+                                    <span className='row row-left'><Disconnected data-tip="Exchange could not be found or connected to." className='exchange-disconnected' fill='#556672'/></span>}
                                 <ReactTooltip className='tooltip' place="bottom" type="light" effect="solid"/>
                             </div>
                         </div>
@@ -183,7 +195,7 @@ function TickerDetail(props) {
                                 <button onClick={() => handleDataViewChange(0)} className='button-default-mini'><img src={Trade} alt='G'/></button>
                                 <button onClick={() => handleDataViewChange(1)} className='button-default-mini'><img src={Web} alt='S'/></button>
                             </div>
-                            {renderDataView(dataView)}
+                            {renderDataView()}
                         </div>
                     </div>
                 </div>
@@ -194,8 +206,8 @@ function TickerDetail(props) {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchPost: (id, currency, token) => dispatch(fetchPost(id, currency, token)),
-        deletePost: (post) => dispatch(deletePost(post))
+        deletePost: (post) => dispatch(deletePost(post)),
+        fetchPost: (id, currency, token) => dispatch(fetchPost(id, currency, token))
     }
 };
 

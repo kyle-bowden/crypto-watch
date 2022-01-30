@@ -1,7 +1,7 @@
 import store from './redux/store'
 import { updatePriceData, postConnectedToWebsocket, webSocketConnected } from './redux/actions';
 
-const FINNHUB_WEB_SOCKET_URL = 'wss://ws.finnhub.io?token=c0pbvn748v6rvej4ig50';
+const FINNHUB_WEB_SOCKET_URL = 'wss://ws.finnhub.io?token=c622n1qad3iacs611jv0';
 
 let retryInterval;
 let inRetry = false;

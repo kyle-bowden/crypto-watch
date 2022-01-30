@@ -47,11 +47,39 @@
 }
 
 .row {
+    display: flex;
+    justify-content: center;
     align-self: center;
     border-radius: 20px;
-    margin: 10px;
+    margin: 0 5px;
     font-size: 1vw;
     font-weight: bold;
+    background-color: #181A1A;
+    width: 100%;
+    height: 100%;
+}
+
+.row-left {
+    display: flex;
+    justify-content: center;
+    margin-left: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    z-index: 99999;
+    background: linear-gradient(90deg, rgba(160,170,170,0.6) 0%, rgba(113,115,115,1) 1%, rgba(0,0,0,1) 14%);
+}
+
+.row-right {
+    display: flex;
+    justify-content: center;
+    margin-right: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.row-detail {
+    height: auto;
+    width: auto;
 }
 
 .chart-7d {
@@ -72,16 +100,16 @@
 
 .exchange {
     align-self: center;
+    width: 100%;
+    height: 100%;
 }
 
 .exchange-connected {
-    width: 40%;
-    height: 40%;
+    align-self: center;
 }
 
 .exchange-disconnected {
-    width: 40%;
-    height: 40%;
+    align-self: center;
 }
 
 .current-price {
@@ -108,11 +136,11 @@
 }
 
 .menu-offset-top {
-    top: 3em;
+    top: 2.5em;
 }
 
 .menu-offset-bottom {
-    bottom: 3em;
+    bottom: 2.5em;
 }
 
 .menu img {
@@ -152,8 +180,8 @@
     margin-top: 12px;
 }
 
-.orange {
-    color: orange;
+.yellow {
+    color: #ffdc00;
 }
 
 .black {
@@ -165,7 +193,11 @@
 }
 
 .red {
-    color: #ffdc00;
+    color: #ff0f1d;
+}
+
+.grey {
+    color: #556672;
 }
 
 .fade-in {

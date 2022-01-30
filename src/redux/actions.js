@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const FINNHUB_TOKEN = "c0pbvn748v6rvej4ig50";
+const FINNHUB_API_ENABLED = false;
+const FINNHUB_TOKEN = "c622n1qad3iacs611jv0";
 
 // FINNHUB https://finnhub.io
 const GET_FINNHUB_EXCHANGE_URL = 'https://localhost:3000/api/v1/crypto/symbol?exchange=[EXCHANGE]&token=' + FINNHUB_TOKEN;
@@ -137,7 +138,9 @@ export const fetchLineData = (id, finnhubSymbol, token) => {
         try {
             let lineData = [];
             let patterns = [];
-            if(finnhubSymbol) {
+
+            // TODO: commented out because FINHUB api is now a payed for service
+            if(FINNHUB_API_ENABLED && finnhubSymbol) {
                 const timeScaleHours = 8;  // TODO: make configurable
                 const resolution = 5; // TODO: make configurable [1, 5, 15, 30, 60, D, W, M]
 
