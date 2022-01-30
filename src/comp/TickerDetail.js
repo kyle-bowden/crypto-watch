@@ -19,12 +19,13 @@ function TickerDetail(props) {
     const dataViews = ["Graph", "Stats"];
     const [dataViewIndex, setDataViewIndex] = useState(0);
     const [lastPrice, setLastPrice] = useState(0);
-    const [colors, setColors] = useState({ colors: ['#000000'] });
+    const [colors, setColors] = useState({ colors: ['#ffffff'] });
+    const [imageBlob, setImageBlob] = useState("");
     const [menu, setMenu] = useState(false);
     const [fetching, setFetching] = useState(true);
     const currency = useSelector((state) => state.currency);
 
-    const initColors = (colors) =>  setColors({colors: colors});
+    const initColors = (colors) => setColors({colors: colors});
 
     const isLower = (value) => {
         return value < 0;
@@ -118,6 +119,24 @@ function TickerDetail(props) {
         }
     };
 
+    const fetchImageAsBlob = (imageUrl) => {
+        if(imageBlob !== "") {
+            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@ LOADED: " + imageBlob);
+            return (
+                <ColorExtractor src={imageBlob} getColors={initColors}/>
+            );
+        }
+
+        fetch(imageUrl, {mode:'no-cors'})
+            .then(response =>  response.blob())
+            .then(blob => {
+                // Then create a local URL for that image and print it
+                const imageObjectURL = URL.createObjectURL(blob);
+                console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + imageObjectURL);
+                setImageBlob(imageObjectURL);
+            });
+    };
+
     useEffect(() => {
         if(props.post.market_data)
             setLastPrice(props.post.market_data.current_price[currency]);
@@ -163,8 +182,7 @@ function TickerDetail(props) {
                             <span className='header-text' style={{color: hexToRgbA(colors.colors[1], 1)}}>{props.post.name.substr(0, 8).toUpperCase()}</span>
                         </div>
                         <div style={{alignSelf: 'center'}}>
-                            <ColorExtractor src={props.post.image.large} getColors={initColors}/>
-                            {/*<ColorExtractor src={props.post.image.large.replace("https://assets.coingecko.com", "https://localhost:3000")} getColors={initColors}/>*/}
+                            <ColorExtractor src={props.post.image.large.replace("https://assets.coingecko.com", window.location.origin)} getColors={initColors} crossOrigin="anonymous"/>
                             {menu ?
                                 <div>
                                     <div className='menu menu-offset-top fade-in'>
