@@ -4,14 +4,14 @@ const FINNHUB_API_ENABLED = false;
 const FINNHUB_TOKEN = "c622n1qad3iacs611jv0";
 
 // FINNHUB https://finnhub.io
-const GET_FINNHUB_EXCHANGE_URL = 'https://localhost:3000/api/v1/crypto/symbol?exchange=[EXCHANGE]&token=' + FINNHUB_TOKEN;
-const GET_FINNHUB_PATTERN_RECOGNITION_URL = 'https://localhost:3000/api/v1/scan/pattern?symbol=[SYMBOL]&resolution=[RESOLUTION]&token=' + FINNHUB_TOKEN;
-const GET_FINNHUB_GRAPH_URL = 'https://localhost:3000/api/v1/crypto/candle?symbol=[SYMBOL]&resolution=[RESOLUTION]&from=[TIME_START]&to=[TIME_END]&token=' + FINNHUB_TOKEN;
+const GET_FINNHUB_EXCHANGE_URL = 'https://finnhub.io/api/v1/crypto/symbol?exchange=[EXCHANGE]&token=' + FINNHUB_TOKEN;
+const GET_FINNHUB_PATTERN_RECOGNITION_URL = 'https://finnhub.io/api/v1/scan/pattern?symbol=[SYMBOL]&resolution=[RESOLUTION]&token=' + FINNHUB_TOKEN;
+const GET_FINNHUB_GRAPH_URL = 'https://finnhub.io/api/v1/crypto/candle?symbol=[SYMBOL]&resolution=[RESOLUTION]&from=[TIME_START]&to=[TIME_END]&token=' + FINNHUB_TOKEN;
 
 // COINGECKO https://api.coingecko.com
-const GET_COIN_LIST = 'https://localhost:3000/api/v3/coins/list';
-const GET_GRAPH_URL = 'https://localhost:3000/api/v3/coins/[ID]/ohlc?vs_currency=usd&days=1';
-const GET_POST_URL = 'https://localhost:3000/api/v3/coins/[ID]?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false';
+const GET_COIN_LIST = 'https://api.coingecko.com/api/v3/coins/list';
+const GET_GRAPH_URL = 'https://api.coingecko.com/api/v3/coins/[ID]/ohlc?vs_currency=usd&days=1';
+const GET_POST_URL = 'https://api.coingecko.com/api/v3/coins/[ID]?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false&sparkline=false';
 
 export const sort = () => ({
     type : 'SORT_POSTS'
