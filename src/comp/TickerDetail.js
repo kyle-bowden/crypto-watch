@@ -119,24 +119,6 @@ function TickerDetail(props) {
         }
     };
 
-    const fetchImageAsBlob = (imageUrl) => {
-        if(imageBlob !== "") {
-            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@ LOADED: " + imageBlob);
-            return (
-                <ColorExtractor src={imageBlob} getColors={initColors}/>
-            );
-        }
-
-        fetch(imageUrl, {mode:'no-cors'})
-            .then(response =>  response.blob())
-            .then(blob => {
-                // Then create a local URL for that image and print it
-                const imageObjectURL = URL.createObjectURL(blob);
-                console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + imageObjectURL);
-                setImageBlob(imageObjectURL);
-            });
-    };
-
     useEffect(() => {
         if(props.post.market_data)
             setLastPrice(props.post.market_data.current_price[currency]);
