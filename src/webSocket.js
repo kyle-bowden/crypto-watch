@@ -1,19 +1,20 @@
 import store from './redux/store'
 import { updatePriceData, postConnectedToWebsocket, webSocketConnected } from './redux/actions';
+import {message} from "react-widgets/lib/PropTypes";
 
-const FINNHUB_WEB_SOCKET_URL = 'wss://ws.finnhub.io?token=c622n1qad3iacs611jv0';
+const WEB_SOCKET_HOST = "ws://localhost:8100/";
 
 let retryInterval;
 let inRetry = false;
 let retryCount = 0;
-let MAX_RETRIES = 5;
+let MAX_RETRIES = 10;
 let START_SECONDS = 2500;
 let retrySeconds = START_SECONDS;
 
 export let socket;
 
 export const connect = () => {
-    socket = new WebSocket(FINNHUB_WEB_SOCKET_URL);
+    socket = new WebSocket(WEB_SOCKET_HOST);
 
     const retryWebSocketConnection = () => {
         if(retryCount > MAX_RETRIES) {
@@ -38,10 +39,10 @@ export const connect = () => {
     };
 
     socket.addEventListener('open', function (event) {
-        console.log(`CONNECTED TO ${FINNHUB_WEB_SOCKET_URL}`);
+        console.log(`CONNECTED TO ${WEB_SOCKET_HOST}`);
 
         if(inRetry) {
-            console.log(`CONNECT ALL POSTS TO ${FINNHUB_WEB_SOCKET_URL}`);
+            console.log(`CONNECT ALL POSTS TO ${WEB_SOCKET_HOST}`);
             store.dispatch(webSocketConnected(true));
 
             cancelRetry();
@@ -71,6 +72,7 @@ export const connect = () => {
 
     socket.addEventListener('message', function (event) {
         const data = JSON.parse(event.data);
+        // console.log("message: " + event.data);
         if(data?.data) store.dispatch(updatePriceData(data.data));
     });
 };
@@ -90,7 +92,8 @@ export const unsubscribe = (id, symbol) => {
     if(socket && socket.readyState === WebSocket.OPEN) {
         if(symbol) {
             console.log(`UNSUBSCRIBE: ${id}`);
-            socket.send(JSON.stringify({'type': 'unsubscribe', 'symbol': symbol}));
+            // TODO: because the websocket is served via the express server we cant unsubscribe in case there are multiple clients using that tracker
+            //socket.send(JSON.stringify({'type': 'unsubscribe', 'symbol': symbol}));
 
             store.dispatch(postConnectedToWebsocket(id, false));
         }
