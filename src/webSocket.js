@@ -1,7 +1,7 @@
 import store from './redux/store'
 import { updatePriceData, postConnectedToWebsocket, webSocketConnected } from './redux/actions';
 
-const WEB_SOCKET_HOST = `wss://${window.location.hostname}/`;
+const WEB_SOCKET_HOST = window.location.origin.replace(/^http/, 'ws');
 
 let retryInterval;
 let inRetry = false;
