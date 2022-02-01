@@ -27,15 +27,12 @@ module.exports = {
 
         socket.on('message', function message(d) {
             const data = JSON.parse(d);
-            // console.log("finnhub message received: " + data);
-
-            setInterval(() => {
-                wss.clients.forEach(function each(client) {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify(data)); // broadcast FINNHUB tracker data to all connected clients
-                    }
-                });
-            }, 1000);
+            
+            wss.clients.forEach(function each(client) {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(data)); // broadcast FINNHUB tracker data to all connected clients
+                }
+            });
         });
     }
 };
