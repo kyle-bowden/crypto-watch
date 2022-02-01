@@ -15,9 +15,18 @@ module.exports = {
         });
 
         // Web socket server
+        const HttpsServer  = require('https').createServer;
+        const readFileSync = require('fs').readFileSync;
         const WebSocketServer = require("ws").Server;
-        const wss = new WebSocketServer({ port: 8100 });
-        console.log("WEB SOCKET SERVER STARTED ON PORT 8100");
+
+        const server = HttpsServer({
+            cert: readFileSync('./cert/cert.pem'),
+            key: readFileSync('./cert/key.pem')
+        });
+
+        const wss = new WebSocketServer({ server });
+        server.listen(8100);
+        console.log("WEB SOCKET SERVER STARTED");
 
         wss.on('connection', function connection(ws) {
             ws.on('message', function message(data) {
