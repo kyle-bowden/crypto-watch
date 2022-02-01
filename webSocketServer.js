@@ -25,7 +25,7 @@ module.exports = {
         });
 
         const wss = new WebSocketServer({ server });
-        server.listen(8100);
+        server.listen(443);
         console.log("WEB SOCKET SERVER STARTED");
 
         wss.on('connection', function connection(ws) {
