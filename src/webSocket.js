@@ -3,66 +3,38 @@ import { updatePriceData, postConnectedToWebsocket, webSocketConnected } from '.
 
 const WEB_SOCKET_HOST = window.location.origin.replace(/^http/, 'ws');
 
-let retryInterval;
 let inRetry = false;
-let retryCount = 0;
-let MAX_RETRIES = 10;
-let START_SECONDS = 2500;
-let retrySeconds = START_SECONDS;
+let retrySeconds = 15000;
 
 export let socket;
 
 export const connect = () => {
     socket = new WebSocket(WEB_SOCKET_HOST);
 
-    const retryWebSocketConnection = () => {
-        if(retryCount > MAX_RETRIES) {
-            console.log("MAX RETRY ATTEMPTS MADE!");
-            cancelRetry();
-        } else {
-            console.log(`RETRYING WEBSOCKET CONNECTION [${retryCount}/${MAX_RETRIES}]`);
-            connect();
-        }
+    const retryConnection = () => {
+        inRetry = true;
+        setTimeout(() => connect(), retrySeconds);
     };
 
     const cancelRetry = () => {
-        if(retryInterval) {
-            clearTimeout(retryInterval);
-            retryInterval = null;
+        if(inRetry) {
+            console.log(`CONNECT ALL POSTS TO ${WEB_SOCKET_HOST}`);
+            store.dispatch(webSocketConnected(true));
+            inRetry = false;
         }
-
-        // TODO: need correct mechanism for resetting retry vars
-        // retrySeconds = START_SECONDS;
-        // retryCount = 0;
-        // inRetry = false;
     };
 
     socket.addEventListener('open', function (event) {
         console.log(`CONNECTED TO ${WEB_SOCKET_HOST}`);
-
-        if(inRetry) {
-            console.log(`CONNECT ALL POSTS TO ${WEB_SOCKET_HOST}`);
-            store.dispatch(webSocketConnected(true));
-
-            cancelRetry();
-        }
+        cancelRetry();
     });
 
     socket.addEventListener('close', (event) => {
         console.log('CONNECTION CLOSED!');
         console.log(event);
 
-        if(retryCount <= MAX_RETRIES) {
-            store.dispatch(webSocketConnected(false));
-
-            socket = null;
-            if(!retryInterval) {
-                retryInterval = setTimeout(() => retryWebSocketConnection(), retrySeconds);
-                retrySeconds *= 2;
-                retryCount++;
-            }
-            inRetry = true;
-        }
+        store.dispatch(webSocketConnected(false));
+        retryConnection();
     });
 
     socket.addEventListener('error', function (event) {
@@ -71,7 +43,6 @@ export const connect = () => {
 
     socket.addEventListener('message', function (event) {
         const data = JSON.parse(event.data);
-        // console.log("message: " + event.data);
         if(data?.data) store.dispatch(updatePriceData(data.data));
     });
 };
