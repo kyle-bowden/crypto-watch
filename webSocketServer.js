@@ -27,6 +27,7 @@ module.exports = {
 
         socket.on('message', function message(d) {
             const data = JSON.parse(d);
+            console.log("FINNHUB DATA RECEIVED: " + d);
             
             wss.clients.forEach(function each(client) {
                 if (client.readyState === WebSocket.OPEN) {
